@@ -2,7 +2,7 @@
 
 A single-device water-literacy team game for the eTwinning project **Guardians of our Waters**.
 
-**[▶ Play live](https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/)** — works in any modern browser on a phone, tablet, laptop, classroom computer or shared screen. No installation, no accounts, no database, no Firebase backend.
+**[▶ Play live](https://physicsplay.github.io/Waters-under-pressure)** — works in any modern browser on a phone, tablet, laptop, classroom computer or shared screen. No installation, no accounts, no database, no Firebase backend.
 
 > Replace the link above with your final GitHub Pages URL after publishing.
 
