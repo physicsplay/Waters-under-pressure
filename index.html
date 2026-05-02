@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Waters Under Pressure | Guardians of our Waters</title>
+  <meta name="description" content="Choose a language and play Waters Under Pressure, a single-device water-literacy team game for the eTwinning project Guardians of our Waters." />
+  <style>
+    :root {
+      --bg1: #0e2030;
+      --bg2: #163450;
+      --panel: rgba(18, 40, 62, 0.78);
+      --panel2: rgba(255, 255, 255, 0.07);
+      --line: rgba(255, 255, 255, 0.16);
+      --text: #f1f7ff;
+      --muted: #bcd2e3;
+      --cyan: #5ddfff;
+      --green: #6ff5b1;
+      --amber: #ffcd6e;
+      --violet: #cdb3ff;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255, 163, 136, 0.14), transparent 32%),
+        radial-gradient(circle at 88% 14%, rgba(205, 179, 255, 0.13), transparent 30%),
+        radial-gradient(circle at 92% 50%, rgba(93, 223, 255, 0.14), transparent 32%),
+        radial-gradient(circle at 18% 78%, rgba(111, 245, 177, 0.12), transparent 30%),
+        linear-gradient(180deg, #1d3b5c 0%, var(--bg1) 55%, #081a2c 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(1080px, 100%);
+      background: linear-gradient(180deg, rgba(8, 18, 30, 0.62), rgba(8, 18, 30, 0.82));
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 42px);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .kicker {
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(40px, 7vw, 76px);
+      line-height: 0.98;
+      margin: 0 0 16px;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #5ddfff 0%, #cdb3ff 45%, #ffa388 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.6;
+      max-width: 62ch;
+      margin: 0 0 22px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .panel h2,
+    .panel h3 {
+      margin: 0 0 12px;
+    }
+
+    .quick {
+      display: grid;
+      gap: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .quick li {
+      margin: 0;
+    }
+
+    .primary-play {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 18px 22px;
+      margin-top: 8px;
+      color: #061423;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      border-radius: 18px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 20px;
+      box-shadow: 0 16px 34px rgba(93, 223, 255, 0.22);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .primary-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(93, 223, 255, 0.30);
+    }
+
+    .language-section {
+      margin-top: 26px;
+    }
+
+    .language-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .lang {
+      display: block;
+      text-decoration: none;
+      color: var(--text);
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 92px;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .lang:hover {
+      transform: translateY(-2px);
+      border-color: rgba(93, 223, 255, 0.55);
+      background: rgba(93, 223, 255, 0.10);
+    }
+
+    .lang strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .lang span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .lang.featured {
+      border-color: rgba(111, 245, 177, 0.55);
+      background: linear-gradient(180deg, rgba(111, 245, 177, 0.14), rgba(93, 223, 255, 0.08));
+    }
+
+    .tag {
+      display: inline-flex;
+      margin-top: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255, 205, 110, 0.12);
+      border: 1px solid rgba(255, 205, 110, 0.25);
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    footer {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    footer strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .language-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 14px;
+      }
+
+      main {
+        border-radius: 22px;
+        padding: 18px;
+      }
+
+      .language-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .primary-play {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <div class="kicker">Guardians of our Waters · eTwinning</div>
+        <h1 id="page-title">Waters Under Pressure</h1>
+        <p class="lead">
+          A single-device water-literacy team game for teenagers. One phone, tablet,
+          laptop or classroom screen becomes the mission console. Teams read evidence,
+          make decisions and protect the watershed.
+        </p>
+        <a class="primary-play" href="./waters_under_pressure_EN.html" aria-label="Play Waters Under Pressure in English">
+          ▶ Play in English
+        </a>
+      </div>
+
+      <aside class="panel" aria-labelledby="how-title">
+        <h2 id="how-title">How it works</h2>
+        <ol class="quick">
+          <li>Open one shared device.</li>
+          <li>Split students into 2 or 3 teams.</li>
+          <li>Pass the device to each team when it is their turn.</li>
+          <li>Each team answers the same evidence-based challenges.</li>
+          <li>The game calculates the score automatically.</li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="language-section" aria-labelledby="languages-title">
+      <h2 id="languages-title">Choose a language</h2>
+      <div class="language-grid">
+        <a class="lang featured" href="./waters_under_pressure_EN.html">
+          <strong>English</strong>
+          <span>International version</span>
+          <span class="tag">Main</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_EL.html">
+          <strong>Ελληνικά</strong>
+          <span>Greek version</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_ES.html">
+          <strong>Español</strong>
+          <span>Spanish version</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_IT.html">
+          <strong>Italiano</strong>
+          <span>Italian version</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_BG.html">
+          <strong>Български</strong>
+          <span>Bulgarian version</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_SK.html">
+          <strong>Slovenčina</strong>
+          <span>Slovak version</span>
+        </a>
+
+        <a class="lang" href="./waters_under_pressure_FR.html">
+          <strong>Français</strong>
+          <span>French version</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <div>
+        <strong>No installation.</strong> No accounts, no database, no backend.
+      </div>
+      <div>
+        Built for the eTwinning project <strong>Guardians of our Waters</strong>.
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
