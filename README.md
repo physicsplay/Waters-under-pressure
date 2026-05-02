@@ -203,7 +203,7 @@ https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/waters_under_pressure_v3.html
 
 ## Language versions
 
-The English version is included here. Translations are also available or being prepared for:
+The English version is included here. Translations are also available for:
 
 - Greek
 - Spanish
