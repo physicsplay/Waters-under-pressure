@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waters Under Pressure: Strážcovia naživo</title>
+<style>
+  :root{
+    /* Lighter, optimistic background — softer "morning over water" instead of midnight */
+    --bg1:#0e2030;
+    --bg2:#163450;
+    --bg3:#1f4868;
+    --panel:rgba(18,40,62,0.74);
+    --panel2:rgba(28,56,84,0.86);
+    --panel3:rgba(255,255,255,0.07);
+    --line:rgba(255,255,255,0.14);
+    --text:#f1f7ff;
+    --muted:#bcd2e3;
+    /* Brighter, friendlier accents */
+    --cyan:#5ddfff;       /* sky-bright cyan */
+    --green:#6ff5b1;      /* fresh mint */
+    --amber:#ffcd6e;      /* soft sunny gold */
+    --red:#ff8095;        /* warm coral-pink */
+    --violet:#cdb3ff;     /* soft lavender */
+    --coral:#ffa388;      /* peachy coral accent */
+    --magenta:#ff7acf;    /* warm pink for celebrations */
+    --shadow:0 18px 48px rgba(0,0,0,.35);
+    --radius:22px;
+    --radiusSm:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--text);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:
+      /* Top-left peach warm glow */
+      radial-gradient(circle at 12% 12%, rgba(255,163,136,.14), transparent 32%),
+      /* Top-right lavender */
+      radial-gradient(circle at 88% 14%, rgba(205,179,255,.13), transparent 30%),
+      /* Mid-right cyan pop */
+      radial-gradient(circle at 92% 50%, rgba(93,223,255,.14), transparent 32%),
+      /* Lower-left mint */
+      radial-gradient(circle at 18% 78%, rgba(111,245,177,.12), transparent 30%),
+      /* Lower-right warm pink */
+      radial-gradient(circle at 82% 88%, rgba(255,122,207,.10), transparent 32%),
+      /* Base — lighter dusk-to-sky gradient */
+      linear-gradient(180deg, #1d3b5c 0%, var(--bg1) 55%, #081a2c 100%);
+    overflow:hidden;
+  }
+  .bg-waves{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden;
+  }
+  .wave{
+    position:absolute; left:-15%; width:130%; height:220px; border-radius:45%;
+    background:linear-gradient(180deg, rgba(93,223,255,.10), rgba(255,255,255,0));
+    filter:blur(10px);
+    animation:drift 16s ease-in-out infinite;
+  }
+  .wave.w1{bottom:8%; animation-duration:20s; opacity:.55; background:linear-gradient(180deg, rgba(93,223,255,.12), rgba(255,255,255,0));}
+  .wave.w2{bottom:0%; animation-duration:28s; opacity:.4; transform:scaleX(1.05); background:linear-gradient(180deg, rgba(205,179,255,.10), rgba(255,255,255,0));}
+  .wave.w3{bottom:-6%; animation-duration:34s; opacity:.30; background:linear-gradient(180deg, rgba(111,245,177,.08), rgba(255,255,255,0));}
+  @keyframes drift{
+    0%,100%{transform:translateX(0) translateY(0)}
+    50%{transform:translateX(4%) translateY(-10px)}
+  }
+
+  .app{
+    position:relative;
+    height:100%;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    gap:16px;
+    padding:18px;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; z-index:2;
+  }
+  .brand{
+    display:flex; align-items:center; gap:14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--line);
+    padding:12px 16px; border-radius:18px; box-shadow:var(--shadow);
+    backdrop-filter:blur(10px);
+  }
+  .brand-icon{
+    width:44px; height:44px; border-radius:14px; display:grid; place-items:center;
+    background:linear-gradient(180deg, rgba(116,230,255,.18), rgba(182,166,255,.08));
+    border:1px solid rgba(116,230,255,.18);
+    color:var(--cyan); font-size:24px; text-shadow:0 0 18px rgba(116,230,255,.25);
+  }
+  .brand h1{
+    margin:0; font-size:18px; letter-spacing:.02em;
+  }
+  .brand small{color:var(--muted); display:block; margin-top:2px; font-size:12px}
+  .top-controls{display:flex; gap:10px; flex-wrap:wrap}
+  button, .btn{
+    border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 16px;
+    font:inherit;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+  }
+  button:hover,.btn:hover{transform:translateY(-1px); border-color:rgba(95,217,255,.45)}
+  button:active,.btn:active{transform:translateY(1px)}
+  button.primary,.btn.primary{
+    background:linear-gradient(135deg, rgba(95,217,255,.30), rgba(196,168,255,.18));
+    border-color:rgba(95,217,255,.50);
+    color:#f5fbff;
+    font-weight:700;
+  }
+  button.primary:hover,.btn.primary:hover{
+    background:linear-gradient(135deg, rgba(95,217,255,.40), rgba(196,168,255,.28));
+    border-color:rgba(95,217,255,.75);
+    box-shadow:0 0 22px rgba(95,217,255,.25), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.success{
+    background:linear-gradient(135deg, rgba(92,242,168,.30), rgba(95,217,255,.16));
+    border-color:rgba(92,242,168,.45);
+    font-weight:700;
+  }
+  button.success:hover{
+    box-shadow:0 0 22px rgba(92,242,168,.25), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.warn{
+    background:linear-gradient(135deg, rgba(255,198,107,.28), rgba(255,157,122,.14));
+    border-color:rgba(255,198,107,.45);
+    font-weight:700;
+  }
+  button.warn:hover{
+    box-shadow:0 0 22px rgba(255,198,107,.22), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.ghost{
+    background:rgba(255,255,255,.03);
+  }
+  button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:0 8px 20px rgba(0,0,0,.15) !important}
+
+  main{
+    min-height:0;
+    display:grid;
+    place-items:center;
+    z-index:1;
+  }
+  .screen{
+    width:min(1200px, 100%);
+    max-height:100%;
+    overflow:auto;
+    background:linear-gradient(180deg, rgba(8,18,30,.55), rgba(8,18,30,.72));
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(16px);
+    padding:28px;
+  }
+  .hero{
+    display:grid;
+    grid-template-columns:1.3fr .95fr;
+    gap:22px;
+    align-items:stretch;
+  }
+
+  /* === Home screen art layer === */
+  .hero-with-art{
+    position:relative;
+    isolation:isolate;
+  }
+  .hero-art{
+    position:absolute;
+    inset:-30px -30px -20px -30px;
+    z-index:-1;
+    pointer-events:none;
+    overflow:hidden;
+    border-radius:32px;
+    /* Soft vignette to fade edges and protect text readability */
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,.4) 75%, rgba(0,0,0,0) 100%);
+    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,.4) 75%, rgba(0,0,0,0) 100%);
+  }
+  .hero-art svg{
+    width:100%; height:100%;
+    /* Subtle drift animation makes the scene feel alive */
+    animation: heroArtDrift 30s ease-in-out infinite alternate;
+    opacity:0.78;
+  }
+  .hero-art .hero-sun{
+    transform-origin: 640px 135px;
+    animation: sunBreathe 6s ease-in-out infinite;
+  }
+  @keyframes sunBreathe{
+    0%,100%{transform: scale(1); opacity: 1;}
+    50%{transform: scale(1.06); opacity: 0.92;}
+  }
+  .hero-art .hero-raft1{
+    animation: raftBob1 7s ease-in-out infinite;
+    transform-origin: 220px 510px;
+  }
+  .hero-art .hero-raft2{
+    animation: raftBob2 9s ease-in-out infinite;
+    transform-origin: 540px 538px;
+  }
+  @keyframes raftBob1{
+    0%,100%{transform: translate(0,0) rotate(0deg);}
+    50%{transform: translate(8px, -2px) rotate(-1.2deg);}
+  }
+  @keyframes raftBob2{
+    0%,100%{transform: translate(0,0) rotate(0deg);}
+    50%{transform: translate(-6px, -1px) rotate(1.5deg);}
+  }
+  .hero-art .hero-particles circle,
+  .hero-art .hero-particles ellipse{
+    animation: particleFloat 7s ease-in-out infinite;
+  }
+  .hero-art .hero-particles > *:nth-child(2n){animation-duration:9s; animation-delay:1.5s}
+  .hero-art .hero-particles > *:nth-child(3n){animation-duration:11s; animation-delay:.7s}
+  .hero-art .hero-particles > *:nth-child(5n){animation-duration:8s; animation-delay:2.3s}
+  @keyframes heroArtDrift{
+    0%   {transform: translate(0px, 0px) scale(1.0);}
+    50%  {transform: translate(8px, -4px) scale(1.02);}
+    100% {transform: translate(-6px, 3px) scale(1.0);}
+  }
+  @keyframes particleFloat{
+    0%,100%{transform: translate(0,0); opacity:.5;}
+    33%    {transform: translate(8px, -10px); opacity:.9;}
+    66%    {transform: translate(-6px, -16px); opacity:.55;}
+  }
+
+  /* Hero panel itself: slightly more transparent to let the art breathe through behind */
+  .hero-panel{
+    background: linear-gradient(135deg, rgba(13,28,46,0.88) 0%, rgba(20,42,66,0.92) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 24px 60px rgba(0,0,0,.35);
+    position:relative;
+    z-index:1;
+  }
+
+  /* Hero title with vibrant gradient — the "wow" moment */
+  .hero-title{
+    background: linear-gradient(135deg, #5fd9ff 0%, #c4a8ff 45%, #ff9d7a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    /* Subtle text shadow fallback for non-supporting browsers */
+    text-shadow: 0 0 30px rgba(95,217,255,.20);
+    animation: titleGlow 5s ease-in-out infinite alternate;
+  }
+  @keyframes titleGlow{
+    0%   {filter: drop-shadow(0 0 0px rgba(95,217,255,0));}
+    100% {filter: drop-shadow(0 0 18px rgba(196,168,255,0.35));}
+  }
+  .hero-subtitle{
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 600;
+    color: var(--cyan);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+    opacity: 0.92;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .panel.soft{background:rgba(255,255,255,.045)}
+  .panel h2,.panel h3,.panel h4{margin:0 0 12px}
+  .kicker{
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--cyan); font-size:12px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .display-title{
+    font-size:clamp(34px, 5vw, 58px);
+    line-height:1.02; margin:0 0 14px;
+  }
+  .lead{
+    color:var(--muted);
+    font-size:18px; line-height:1.55; max-width:62ch; margin:0 0 18px;
+  }
+  .tiny{font-size:12px; color:var(--muted)}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px}
+  .chip{
+    padding:8px 12px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--muted); font-size:13px;
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .stack{display:grid; gap:14px}
+  .stat{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+  }
+  .stat .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  .stat .value{font-size:30px; margin-top:6px; font-weight:800}
+  label{display:block; margin-bottom:8px; color:var(--muted); font-size:13px}
+  input, select{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.18);
+    color:var(--text);
+    padding:13px 14px;
+    font:inherit;
+    outline:none;
+  }
+  input:focus, select:focus{border-color:rgba(116,230,255,.44); box-shadow:0 0 0 3px rgba(116,230,255,.10)}
+  .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+  .howto{
+    display:grid;
+    gap:14px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .howto ol{padding-left:20px; margin:0}
+  .howto li{margin:8px 0}
+  .round-header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
+  }
+  .score-strip{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;
+  }
+  .team-card{
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+    min-width:0;
+  }
+  .team-card h4{margin:0 0 6px; font-size:16px}
+  .team-card .meta{display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:13px}
+  .token{
+    padding:4px 8px; border-radius:999px; background:rgba(116,230,255,.10); border:1px solid rgba(116,230,255,.22); color:var(--cyan)
+  }
+  .round-type{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:999px;
+    background:rgba(116,230,255,.09); border:1px solid rgba(116,230,255,.22); color:var(--cyan); font-weight:700;
+  }
+  .evidence-layout{
+    display:grid; grid-template-columns:1.1fr .9fr; gap:18px;
+  }
+  .list{
+    display:grid; gap:10px; padding:0; margin:0;
+  }
+  .list li{
+    list-style:none; padding:11px 13px; border-radius:14px;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  }
+  .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .metric{
+    padding:12px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid var(--line)
+  }
+  .metric .m-label{font-size:12px; color:var(--muted)}
+  .metric .m-value{font-size:16px; font-weight:700; margin-top:4px}
+  .flavor{
+    margin-top:16px; color:#d6e9fb; font-style:italic; border-left:3px solid rgba(116,230,255,.3); padding-left:12px;
+  }
+  .roll-stage{
+    display:grid; place-items:center; gap:20px; min-height:340px; text-align:center;
+  }
+  .die-wrap{perspective:900px}
+  .die{
+    width:138px; height:138px; border-radius:26px;
+    display:grid; place-items:center;
+    background:linear-gradient(180deg, rgba(116,230,255,.20), rgba(182,166,255,.10));
+    border:1px solid rgba(116,230,255,.34);
+    box-shadow:0 0 42px rgba(116,230,255,.10), inset 0 0 18px rgba(255,255,255,.05);
+    font-size:62px;
+    transform-style:preserve-3d;
+  }
+  .die.rolling{animation:spin 1.8s cubic-bezier(.2,.75,.2,1)}
+  @keyframes spin{
+    0%{transform:rotateX(0deg) rotateY(0deg)}
+    30%{transform:rotateX(250deg) rotateY(210deg)}
+    60%{transform:rotateX(520deg) rotateY(470deg)}
+    100%{transform:rotateX(720deg) rotateY(690deg)}
+  }
+  .type-name{font-size:28px; font-weight:800}
+  .subtle{color:var(--muted)}
+  .decision-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .submit-card{
+    position:relative;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+  }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
+    border-radius:999px; font-size:12px; font-weight:700; margin-bottom:10px;
+    background:rgba(255,255,255,.06);
+  }
+  .status-pending{color:var(--amber); border:1px solid rgba(255,209,126,.22)}
+  .status-done{color:var(--green); border:1px solid rgba(125,242,180,.22)}
+  .question{
+    padding:14px;
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+  }
+  .q-title{font-weight:700; margin-bottom:12px}
+  .options{display:grid; gap:10px}
+  .option{
+    position:relative;
+    display:flex; gap:10px; align-items:flex-start;
+    padding:12px 12px 12px 44px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    cursor:pointer;
+    transition:border-color .16s ease, background .16s ease, transform .12s ease;
+  }
+  .option:hover{border-color:rgba(116,230,255,.33); transform:translateY(-1px)}
+  .option input{position:absolute; opacity:0; pointer-events:none}
+  .option .mark{
+    position:absolute; left:12px; top:12px; width:22px; height:22px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.20); display:grid; place-items:center; color:transparent;
+    background:rgba(0,0,0,.16);
+  }
+  .option.selected{
+    background:rgba(116,230,255,.10);
+    border-color:rgba(116,230,255,.40);
+  }
+  .option.selected .mark{
+    color:var(--cyan); border-color:rgba(116,230,255,.42);
+    box-shadow:0 0 0 4px rgba(116,230,255,.08);
+  }
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(2,8,14,.62); backdrop-filter:blur(6px); z-index:15;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-backdrop.show{display:flex}
+  .modal{
+    width:min(930px, 100%);
+    max-height:92vh;
+    overflow:auto;
+    background:linear-gradient(180deg, rgba(8,20,32,.96), rgba(8,20,32,.98));
+    border:1px solid var(--line);
+    border-radius:28px; box-shadow:var(--shadow); padding:24px;
+  }
+  .modal-header{
+    display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:18px;
+  }
+  .timer{
+    min-width:120px;
+    text-align:center;
+    padding:12px 14px; border-radius:16px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .timer .num{
+    font-size:28px; font-weight:800;
+    transition: color .25s ease, transform .15s ease;
+    color: var(--text);
+  }
+  .timer .num.timer-warn{
+    color: var(--amber);
+    animation: timerPulseWarn 1s ease-in-out infinite;
+  }
+  .timer .num.timer-critical{
+    color: var(--red);
+    animation: timerPulseCrit .5s ease-in-out infinite;
+  }
+  .timer .num.timer-up{
+    color: var(--red);
+    animation: timerUpShake .35s ease 0s 2;
+    transform: scale(1.15);
+  }
+  @keyframes timerPulseWarn{
+    0%,100%{transform: scale(1)}
+    50%{transform: scale(1.06); text-shadow: 0 0 16px rgba(255,198,107,.45)}
+  }
+  @keyframes timerPulseCrit{
+    0%,100%{transform: scale(1); text-shadow: 0 0 0 rgba(255,122,138,0)}
+    50%{transform: scale(1.10); text-shadow: 0 0 18px rgba(255,122,138,.65)}
+  }
+  @keyframes timerUpShake{
+    0%,100%{transform: scale(1.15) translateX(0)}
+    25%{transform: scale(1.15) translateX(-3px)}
+    75%{transform: scale(1.15) translateX(3px)}
+  }
+  .clue-box{
+    margin:14px 0 18px;
+    padding:14px;
+    border-radius:18px;
+    background:rgba(182,166,255,.10);
+    border:1px solid rgba(182,166,255,.25);
+    color:#e9e0ff;
+  }
+  /* === Reasoning Hint system === */
+  .hint-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; margin:6px 0 10px;
+    border-radius:12px;
+    background:rgba(125,242,180,.08);
+    border:1px solid rgba(125,242,180,.30);
+    color:#cdf5e0;
+    font-size:13px; font-weight:600;
+    cursor:pointer; user-select:none;
+    transition:transform .12s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    position:relative;
+  }
+  .hint-btn:not(.used)::before{
+    content:''; position:absolute; inset:-2px;
+    border-radius:14px; pointer-events:none;
+    box-shadow:0 0 0 0 rgba(125,242,180,.35);
+    animation:hintPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes hintPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(125,242,180,0)}
+    50%{box-shadow:0 0 0 4px rgba(125,242,180,.10)}
+  }
+  .hint-btn:hover{transform:translateY(-1px); background:rgba(125,242,180,.14); border-color:rgba(125,242,180,.5)}
+  .hint-btn:focus-visible{outline:2px solid var(--green); outline-offset:2px}
+  .hint-btn.used{background:rgba(255,255,255,.04); border-color:var(--line); color:var(--muted); cursor:default}
+  .hint-btn.used:hover{transform:none; background:rgba(255,255,255,.04); border-color:var(--line)}
+  .hint-btn.used::before{display:none}
+  .hint-btn .lamp{display:inline-block; transform:translateY(-1px)}
+  .hint-reveal{
+    margin:4px 0 14px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(125,242,180,.10), rgba(125,242,180,.04));
+    border:1px solid rgba(125,242,180,.28);
+    color:#dff6ea;
+    font-size:13.5px; line-height:1.55;
+    animation:hintSlide .35s ease;
+  }
+  .hint-reveal strong{color:var(--green); font-weight:700}
+  @keyframes hintSlide{
+    from{opacity:0; transform:translateY(-4px)}
+    to{opacity:1; transform:translateY(0)}
+  }
+  /* Streak / momentum chip */
+  .streak-row{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;
+  }
+  .streak-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line);
+    font-size:12px; color:var(--muted);
+  }
+  .streak-chip.hot{
+    background:linear-gradient(90deg, rgba(255,209,126,.18), rgba(255,133,133,.12));
+    border-color:rgba(255,209,126,.40);
+    color:#ffe4b3;
+    box-shadow:0 0 12px rgba(255,209,126,.18);
+  }
+  .streak-chip .flame{font-size:13px}
+  .perfect-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:999px;
+    background:rgba(116,230,255,.10); border:1px solid rgba(116,230,255,.35);
+    color:var(--cyan); font-size:12px; font-weight:700; letter-spacing:.04em;
+    margin-left:6px;
+  }
+  /* Reading-the-data tip box on the evidence screen */
+  .reading-tip{
+    margin:12px 0 18px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(116,230,255,.06), rgba(116,230,255,.02));
+    border:1px solid rgba(116,230,255,.22);
+    color:#dff0fb;
+    font-size:13.5px; line-height:1.55;
+  }
+  .reading-tip strong{color:var(--cyan); font-weight:700}
+  .reading-tip em{color:#cfe7ff; font-style:italic}
+
+  /* Persona picker */
+  .team-setup-row{display:flex; flex-direction:column; gap:6px}
+  .persona-select{
+    width:100%;
+    padding:10px 12px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:12px;
+    color:var(--text);
+    font-size:14px;
+    font-family:inherit;
+    /* Critical: force native arrow visibility on dark bg */
+    background-image: linear-gradient(45deg, transparent 50%, var(--cyan) 50%),
+                      linear-gradient(135deg, var(--cyan) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right:32px;
+    cursor:pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .persona-select:hover{
+    border-color: rgba(95,217,255,.45);
+    background-color: rgba(95,217,255,.06);
+  }
+  .persona-select:focus{outline:2px solid var(--green); outline-offset:1px}
+  /* CRITICAL: option elements get system colors by default —
+     force dark bg + light text so the dropdown is readable on every browser */
+  .persona-select option{
+    background-color:#0e2237;
+    color:#edf6ff;
+    padding:8px;
+  }
+  .persona-select option:checked,
+  .persona-select option:hover{
+    background-color:#1a3a5a;
+    color:#5fd9ff;
+  }
+  .hidden-when-preset{display:none !important}
+  /* When the input is shown for custom names */
+  input.hidden-when-preset:not(.hidden-when-preset){
+    display:block !important;
+  }
+
+  /* Achievement medals on result screen */
+  .medals-row{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;
+  }
+  .medal{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 10px; border-radius:999px;
+    background:linear-gradient(135deg, rgba(255,209,126,.16), rgba(255,133,133,.10));
+    border:1px solid rgba(255,209,126,.42);
+    color:#ffe9c2; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+  }
+  .medal .ico{font-size:13px}
+
+  /* Reaction beat under team result */
+  .reaction-beat{
+    margin-top:8px;
+    font-size:12.5px;
+    color:#bcd4e0;
+    font-style:italic;
+    opacity:.85;
+  }
+  /* Team icon next to name */
+  .team-icon{
+    display:inline-block;
+    margin-right:6px;
+    font-size:1em;
+  }
+  .resolution-grid{
+    display:grid; grid-template-columns:1.05fr .95fr; gap:18px;
+  }
+  .answer-key-item{
+    padding:14px;
+    border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.04); margin-bottom:12px;
+  }
+  .answer-key-item .pts{color:var(--cyan); font-weight:700}
+  .hint-recap{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:rgba(125,242,180,.07);
+    border:1px dashed rgba(125,242,180,.30);
+    color:#cdf5e0;
+    font-size:13px; line-height:1.5;
+  }
+  .hint-recap .lamp{margin-right:4px}
+  .hint-recap em{color:var(--green); font-style:normal; font-weight:600}
+  .result-team{
+    border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.04); padding:16px; margin-bottom:12px;
+  }
+  .gain{font-size:28px; font-weight:800}
+  .gain.positive{color:var(--green)}
+  .table{
+    width:100%; border-collapse:collapse; font-size:14px;
+  }
+  .table th,.table td{padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left}
+  .table th{color:var(--muted); font-weight:600}
+  footer{
+    z-index:2;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    color:var(--muted); font-size:13px;
+  }
+  .footer-note{
+    background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
+  }
+  .hidden{display:none !important}
+  .center{text-align:center}
+  .big-score{
+    font-size:80px; font-weight:900; line-height:1; margin:4px 0 12px;
+    background:linear-gradient(180deg, #fff, #9beeff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .winner{
+    padding:20px; border-radius:24px; background:linear-gradient(180deg, rgba(125,242,180,.13), rgba(116,230,255,.08));
+    border:1px solid rgba(125,242,180,.28);
+  }
+  .narration{
+    padding:18px;
+    border-radius:18px;
+    border:1px solid rgba(116,230,255,.20);
+    background:linear-gradient(180deg, rgba(116,230,255,.07), rgba(255,255,255,.02));
+    color:#dfefff; line-height:1.7;
+  }
+  .pill-row{display:flex; flex-wrap:wrap; gap:10px}
+  .caption{font-size:12px; color:var(--muted); margin-top:6px}
+  .helper{color:var(--muted); line-height:1.55}
+  @media (max-width: 980px){
+    .hero,.evidence-layout,.resolution-grid{grid-template-columns:1fr}
+    .decision-grid,.score-strip,.grid3,.grid2{grid-template-columns:1fr}
+    .screen{padding:18px}
+    header,.round-header,footer{flex-direction:column; align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="bg-waves" aria-hidden="true">
+  <div class="wave w1"></div>
+  <div class="wave w2"></div>
+  <div class="wave w3"></div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-icon">◈</div>
+      <div>
+        <h1>Waters Under Pressure: Strážcovia naživo</h1>
+        <small>Čítajte dôkazy. Rozhodnite. Chráňte vodu.</small>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="audioToggle" class="ghost">Zvuk: zapnutý</button>
+      <button id="howToBtn" class="ghost">Ako hrať</button>
+      <button id="resetBtn" class="ghost">Obnoviť</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="screen" class="screen"></div>
+  </main>
+
+  <footer>
+    <div class="footer-note">Prototypová edícia: vyladená verzia v jednom súbore. Plne hrateľná. Najlepšia pre triedu so zdieľanou obrazovkou alebo pre online vedenú hru.</div>
+    <div class="footer-note" id="footerFlavor">Povodie si naďalej všetko pamätá.</div>
+  </footer>
+</div>
+
+<div id="modalSpäťdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+(() => {
+  const TYPES = {
+    "Terénny test": { icon: "◌", color: "var(--cyan)", desc: "Vyberte najužitočnejšie meranie alebo chýbajúci dôkaz." },
+    "Varovanie pred znečistením": { icon: "△", color: "var(--amber)", desc: "Určte najpravdepodobnejší zdroj alebo typ tlaku." },
+    "Rýchla reakcia": { icon: "↯", color: "var(--red)", desc: "Vyberte najlepšie okamžité opatrenie." },
+    "Správa komunite": { icon: "✦", color: "var(--violet)", desc: "Vyberte najzodpovednejší komunikačný krok." },
+    "Cezhraničné prepojenie": { icon: "⟷", color: "var(--violet)", desc: "Prepojte dôkazy medzi tímami alebo lokalitami." },
+    "Okno pre opatrenia": { icon: "▣", color: "var(--green)", desc: "Vyberte najúčinnejšiu inštitucionálnu reakciu." }
+  };
+
+  const ROUNDS = [
+    // ====================================================================
+    // ROUND 1 — EASY. Clear evidence, distractors are mostly off-topic.
+    // Correct positions: 2, 0, 1, 3
+    // ====================================================================
+    {
+      type: "Terénny test",
+      title: "Po daždi",
+      location: "Mestský potok pri škole",
+      conditions: "Silný dážď pred 18 hodinami",
+      observations: [
+        "Voda je oveľa zakalenejšia než zvyčajne.",
+        "Pri dažďových vpustoch vidno malé zhluky odpadu.",
+        "Prúd je rýchlejší než týždenný priemer."
+      ],
+      data: {
+        "Zákal": "Sharply increased",
+        "Rozpustený kyslík": "Normálne",
+        "pH": "V normálnom rozsahu",
+        "Dusičnany": "Mierne zvýšené"
+      },
+      flavor: "Voda poskytuje spätnú väzbu. Nie je veľmi nenápadná.",
+      extraClue: "Oblak odtoku je viditeľne najsilnejší pri jednom výustení dažďovej kanalizácie.",
+      questions: [
+        {
+          text: "Aký je najpravdepodobnejší hlavný problém?",
+          points: 2,
+          options: [
+            "Dlhodobý prienik slanej vody",
+            "Vážny pokles kyslíka",
+            "Sediment a odtok po daždi",
+            "Rieka si vytvorila názor"
+          ],
+          correct: 2
+        },
+        {
+          text: "Ktorý dôkaz je práve teraz najužitočnejší?",
+          points: 2,
+          options: [
+            "Úroveň zákalu a pozorovania pri dažďových vpustoch",
+            "Celkové zrážky za posledných 24 hodín",
+            "Priemerná veľkosť topánok odberového tímu",
+            "Nálada miestnych husí"
+          ],
+          correct: 0
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Poslať dažďu dôrazne formulovaný list",
+            "Preskúmať trasy odtoku a vstupy z dažďovej kanalizácie, potom opäť otestovať vodu po prúde",
+            "Ignorovať udalosť a počkať mesiac",
+            "Vymeniť blízke tabule pred zberom ďalších dôkazov"
+          ],
+          correct: 1
+        },
+        {
+          text: "Kto by mal byť informovaný ako prvý?",
+          points: 1,
+          options: [
+            "Turistické agentúry v inom meste",
+            "Školský dramatický krúžok, ak by z toho vznikla divadelná hra",
+            "Náhodný verejný skupinový chat",
+            "Školský ekotím a miestny vodohospodársky orgán"
+          ],
+          correct: 3
+          // Drama-club option = the dry-funny one. Tourist agencies and
+          // group chat are ordinary wrongs.
+        }
+      ],
+      explanation: "Silný dážď, vysoký zákal, rýchlejší prúd a viditeľný odpad pri vpustoch poukazujú skôr na tlak z odtoku než na pokles kyslíka alebo okyslenie.",
+      perfectLine: "Výborný začiatok. Rieka je stále znepokojená, ale aj ohromená."
+    },
+
+    // ====================================================================
+    // ROUND 2 — EASY-MEDIUM. One distractor is plausible (warm-water fish kill).
+    // Correct positions: 1, 3, 0, 2
+    // ====================================================================
+    {
+      type: "Varovanie pred znečistením",
+      title: "Zelený povrch, málo kyslíka",
+      location: "Zátoka jazera pri rekreačnej oblasti",
+      conditions: "Teplé počasie, bez významných zrážok počas 6 dní",
+      observations: [
+        "Na stojatej vode je viditeľný zelený povlak.",
+        "Pri východe slnka vidno ryby blízko hladiny.",
+        "V zátoke je len slabý pohyb vody."
+      ],
+      data: {
+        "Fosforečnany": "Vysoké",
+        "Rozpustený kyslík": "Nízky skoro ráno",
+        "pH": "Mierne nad obvyklým rozsahom",
+        "Zákal": "Stredný"
+      },
+      flavor: "Jazero vstúpilo do svojej riasovej éry. Nikomu to neprospieva.",
+      extraClue: "Neďaleký trávnik bol pred tromi dňami hnojený.",
+      questions: [
+        {
+          text: "Aký je najpravdepodobnejší hlavný problém?",
+          points: 2,
+          options: [
+            "Samotná strata kyslíka spôsobená teplom",
+            "Eutrofizácia spôsobená obohatením živinami",
+            "Únik ťažkých kovov z ťažby",
+            "Ryby zakladajú odbory"
+          ],
+          correct: 1
+        },
+        {
+          text: "Ktorý dôkaz je práve teraz najužitočnejší?",
+          points: 2,
+          options: [
+            "Počet lavičiek pri jazere",
+            "Smer vetra z minulého mesiaca",
+            "Prieskum emocionálneho stresu u labutí",
+            "Vysoké hodnoty fosforečnanov a nízky rozpustený kyslík"
+          ],
+          correct: 3
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Znížiť vstupy živín pri zdroji, zdokumentovať kvitnutie a upozorniť miestne environmentálne orgány",
+            "Pridať mydlo na rozbitie povrchovej vrstvy",
+            "Oznámiť, že kvitnutie je neškodné, bez potvrdenia",
+            "Zdvorilo požiadať riasy, aby odišli"
+          ],
+          correct: 0
+        },
+        {
+          text: "Aké je najzodpovednejšie verejné oznámenie?",
+          points: 1,
+          options: [
+            "Jazero je určite toxické.",
+            "Všetko je v poriadku. Ignorujte zelenú vrstvu.",
+            "Zistené možné kvitnutie rias. Vyhnite sa priamemu kontaktu, kým nebude dokončené miestne potvrdenie.",
+            "Ryby pravdepodobne preháňajú."
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "Vysoké koncentrácie fosforečnanov spolu s nízkym ranným kyslíkom a viditeľným povrchovým kvitnutím silne podporujú vysvetlenie eutrofizáciou — samotné teplo by zelený povlak nevytvorilo.",
+      perfectLine: "Vybrali ste opatrnosť, dôkazy a kompetentnosť. Vzácna a cenná kombinácia."
+    },
+
+    // ====================================================================
+    // ROUND 3 — MEDIUM. Plausible distractors: tide, beach storm runoff.
+    // Correct positions: 3, 1, 0, 2
+    // ====================================================================
+    {
+      type: "Rýchla reakcia",
+      title: "Festivalový odplav",
+      location: "Pobrežná promenáda pri školskej komunite",
+      conditions: "Vysoká návštevnosť počas víkendu",
+      observations: [
+        "Jednorazový plastový odpad sa sústreďuje pri vstupoch do odvodnenia.",
+        "Vietor tlačí plávajúci odpad smerom k zátoke.",
+        "Nie je prítomný nezvyčajný zápach ani viditeľný olejový film."
+      ],
+      data: {
+        "pH": "Normálne",
+        "Rozpustený kyslík": "Normálne",
+        "Vodivosť": "Normálne",
+        "Počet odpadkov": "Výrazne zvýšené za 24 hodín"
+      },
+      flavor: "Silný výkon kultúry pohodlia.",
+      extraClue: "80 % viditeľného odpadu tvoria jednorazové obaly z jedla alebo nápojov.",
+      questions: [
+        {
+          text: "Aký je hlavný problém?",
+          points: 2,
+          options: [
+            "Erózia pláže spôsobená skoršou búrkou",
+            "Chronická kontaminácia ťažkými kovmi",
+            "Pobrežná znudenosť",
+            "Náhle nahromadenie plastového odpadu a upchaté odvodňovacie trasy"
+          ],
+          correct: 3
+        },
+        {
+          text: "Ktorý dôkaz je práve teraz najužitočnejší?",
+          points: 2,
+          options: [
+            "Fáza Mesiaca",
+            "Mapovanie odpadu pri vpustoch a miestach hromadenia na pobreží",
+            "Všeobecné spočítanie morských vtákov v oblasti",
+            "Vnútorná vlhkosť v triede"
+          ],
+          correct: 1
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Zorganizovať čistenie zamerané na zdroj pri ústiach vpustov a pobrežných hotspotoch a zároveň dokumentovať typy odpadu",
+            "Počkať, či príliv problém vyrieši",
+            "Naplánovať regionálny obrad pomenovania zátoky",
+            "Premaľovať koše inou farbou a tým skončiť"
+          ],
+          correct: 0
+        },
+        {
+          text: "Ktorý partner je najskôr najužitočnejší?",
+          points: 1,
+          options: [
+            "Motivačný morský vták",
+            "Nikto",
+            "Mestské odpadové služby a školský/komunitný čistiaci tím",
+            "Fiktívne ministerstvo"
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "Incident je jednoznačne tlakom odpadu, nie chemickou krízou kvality vody. Rýchle čistenie zamerané na zdroj a dokumentácia sú správnou prvou reakciou.",
+      perfectLine: "Efektívne, presné a len mierne sklamané ľudstvom."
+    },
+
+    // ====================================================================
+    // ROUND 4 — MEDIUM-HARD. Multiple plausible distractors, must reason carefully.
+    // Correct positions: 0, 2, 3, 1
+    // ====================================================================
+    {
+      type: "Správa komunite",
+      title: "Vyzerá v poriadku. Nie je.",
+      location: "Kúpacia oblasť rieky po prúde od mestskej zóny",
+      conditions: "Intenzívny dážď nasledovaný oznámením o prepade od prevádzkovateľa siete",
+      observations: [
+        "Voda vyzerá na pohľad normálne.",
+        "Verejná oblasť sa stále používa.",
+        "Oznámenie o prepade bolo vydané pred 8 hodinami."
+      ],
+      data: {
+        "Výsledok E. coli": "Čaká sa",
+        "Zákal": "Mierne zvýšené",
+        "pH": "Normálne",
+        "Rozpustený kyslík": "Normálne"
+      },
+      flavor: "Vizuálna čistota naďalej preceňuje svoju odbornosť.",
+      extraClue: "Udalosť prepadu potvrdil prevádzkovateľ siete.",
+      questions: [
+        {
+          text: "Aký je najpravdepodobnejší hlavný problém?",
+          points: 2,
+          options: [
+            "Možná mikrobiálna kontaminácia po prepade kanalizácie",
+            "Udalosť len so sedimentom po daždi",
+            "Vnos ťažkých kovov z mestského odtoku",
+            "Regionálna porucha nálady, najmä u rýb"
+          ],
+          correct: 0
+        },
+        {
+          text: "Ktorý dôkaz je teraz najrozhodujúcejší?",
+          points: 2,
+          options: [
+            "Iba farba vody",
+            "Kontrola nálady miestnou volavkou",
+            "Oznámenie o prepade plus čakajúce výsledky bakteriálneho testu",
+            "Teplota vzduchu na brehu"
+          ],
+          correct: 2
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Vyhlásiť vodu za bezpečnú, pretože vyzerá čistá",
+            "Počkať, kým viditeľný zákal klesne, a potom znovu otvoriť bez testovania",
+            "Zdvorilo požiadať baktérie, aby sa odhalili",
+            "Vydanie dočasného odporúčania vyhnúť sa kontaktu a uprednostnenie mikrobiálneho testovania"
+          ],
+          correct: 3
+        },
+        {
+          text: "Aké je najzodpovednejšie verejné oznámenie?",
+          points: 1,
+          options: [
+            "Rieka je nebezpečná na neurčito.",
+            "Nedávny prepad môže ovplyvniť bezpečnosť vody. Vyhnite sa kontaktu, kým testovanie nepotvrdí podmienky.",
+            "Rieka vyzerá v poriadku, takže bežné používanie môže pokračovať.",
+            "Komunikácia sa preceňuje; dôverujte inštinktom plavcov."
+          ],
+          correct: 1
+        }
+      ],
+      explanation: "Pri prepadoch vzhľad nestačí. Mikrobiálne riziko potrebuje primeranú komunikáciu a laboratórne testovanie, nie vizuálny optimizmus alebo ticho.",
+      perfectLine: "Výborné odmietnutie zamieňať si čistý vzhľad s bezpečnosťou."
+    },
+
+    // ====================================================================
+    // ROUND 5 — HARD. Cross-border. Several distractors are partially-true
+    // (a real piece of the picture, but not the strongest interpretation).
+    // Correct positions: 2, 0, 3, 1
+    // ====================================================================
+    {
+      type: "Cezhraničné prepojenie",
+      title: "Proti prúdu, po prúde",
+      location: "Prepojený riečno-estuárový systém naprieč partnerskými regiónmi",
+      conditions: "Tímy dostávajú rôzne dôkazy z prepojených lokalít",
+      observations: [
+        "Žiadny tím nevidí celý obraz.",
+        "Využitie krajiny proti prúdu a príznaky po prúde môžu súvisieť.",
+        "Spoločná interpretácia je možná aj bez spoločného hádania."
+      ],
+      data: {
+        "Tím A": "Poľnohospodársky kanál proti prúdu",
+        "Tím B": "Okraj estuária po prúde",
+        "Tím C": "Odvodňovací uzol pri vstupe prítoku"
+      },
+      teamSpecific: {
+        0: {
+          label: "Dôkazy tímu A",
+          lines: [
+            "Neďaleko bolo hlásené nedávne použitie hnojiva.",
+            "Po daždi je na okrajoch polí viditeľná obnažená pôda.",
+            "Dusičnany: vysoké.",
+            "Zákal: stredný."
+          ]
+        },
+        1: {
+          label: "Dôkazy tímu B",
+          lines: [
+            "V chránených vodách pribúda zelených škvŕn.",
+            "Na úsvite boli ryby videné pri hladine.",
+            "Rozpustený kyslík: nízky skoro ráno.",
+            "Fosforečnany: stredné."
+          ]
+        },
+        2: {
+          label: "Dôkazy tímu C",
+          lines: [
+            "Odtok bol po daždi rýchly.",
+            "Voda priteká z odvodňovacej priekopy.",
+            "Dusičnany: zvýšené.",
+            "Prietok: dočasne vysoký."
+          ]
+        }
+      },
+      flavor: "Vodné systémy zostávajú prepojené, napriek opakovaným pokusom ignorovať to.",
+      extraClue: "Odtok dosiahol maximum do 12 hodín od aplikácie hnojiva.",
+      questions: [
+        {
+          text: "Aká je najlepšia celková interpretácia?",
+          points: 2,
+          options: [
+            "Dva nesúvisiace problémy prebiehajúce súčasne v rôznych regiónoch",
+            "Problém s kyslíkom obmedzený len na estuárium a spôsobený teplým počasím",
+            "Odtok živín proti prúdu prispieva k riziku eutrofizácie po prúde",
+            "Medziregionálny protest rýb"
+          ],
+          correct: 2
+        },
+        {
+          text: "Ktorý prepojený dôkaz je najdôležitejší?",
+          points: 2,
+          options: [
+            "Nárast živín proti prúdu spolu s kyslíkovým stresom a znakmi kvitnutia po prúde",
+            "Samotný sedimentový zákal v odvodňovacom uzle, keďže spúšťačom je odtok",
+            "Samotné príznaky v estuáriu, keďže tam je viditeľné poškodenie",
+            "Analýza nálady vtáčieho spevu naprieč povodiami"
+          ],
+          correct: 0
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Zaobchádzať s každým miestom ako s nesúvisiacim a komunikovať oddelene",
+            "Vydávať varovania po prúde, zatiaľ čo vyšetrovanie proti prúdu skončí oveľa neskôr",
+            "Zverejniť prísny otvorený list povodiu",
+            "Koordinovať monitoring proti prúdu aj po prúde a upozorniť príslušné miestne orgány na oboch miestach"
+          ],
+          correct: 3
+        },
+        {
+          text: "Aký je najzodpovednejší krok spolupráce?",
+          points: 1,
+          options: [
+            "Tím s najsilnejším prípadom publikuje ako prvý; ostatní sa prispôsobia potom",
+            "Zdieľať prepojené zistenia medzi tímami pred dokončením verejných záverov",
+            "Každý tím publikuje nezávislé závery, aby si zachoval regionálnu autonómiu",
+            "Zvolať núdzový summit blízkych kačíc"
+          ],
+          correct: 1
+        }
+      ],
+      explanation: "Najsilnejším vysvetlením je prepojená cesta živín: tlak odtoku proti prúdu, transport cez odvodnenie, eutrofizačný stres po prúde. Každý jednotlivý príznak je skutočný, ale iba prepojený pohľad navrhuje užitočné opatrenia.",
+      perfectLine: "Všimli ste si systém, nielen príznaky. Výborne."
+    },
+
+    // ====================================================================
+    // ROUND 6 — HARD. Two genuinely competing interpretations.
+    // Correct positions: 1, 3, 0, 2
+    // ====================================================================
+    {
+      type: "Okno pre opatrenia",
+      title: "Škola ako povodie",
+      location: "Školský areál a priľahlá spevnená plocha",
+      conditions: "Opakované hlásenia zbytočných strát vody a zaplavovania pri okrajoch vpustov",
+      observations: [
+        "Jeden vonkajší kohútik neustále preteká.",
+        "Väčšina dažďovej vody z dvora odteká priamo do vpustov.",
+        "V areáli je veľmi málo priepustného povrchu."
+      ],
+      data: {
+        "Spotreba vody v škole tento mesiac": "Nezvyčajne vysoká",
+        "Audit únikov": "Potvrdené nevyriešené straty",
+        "Systémy zachytávania dažďovej vody": "Chýbajú",
+        "Povrchový odtok po búrkach": "Vysoké"
+      },
+      flavor: "Školský areál sa zapája do kolobehu vody dosť agresívne.",
+      extraClue: "Strata únikom je dosť merateľná na to, aby ovplyvnila mesačné súčty spotreby vody.",
+      questions: [
+        {
+          text: "Aký je hlavný problém?",
+          points: 2,
+          options: [
+            "Jeden pokazený kohútik, ktorý vysvetľuje celý mesačný nárast spotreby vody",
+            "Kombinované zlyhanie starostlivosti o areál: úniky, žiadne zachytávanie a nepriepustné povrchy",
+            "Nadmerná spotreba pitnej vody študentmi",
+            "Nadšená a neustála účasť areálu na kolobehu vody"
+          ],
+          correct: 1
+        },
+        {
+          text: "Ktorý dôkaz je práve teraz najužitočnejší?",
+          points: 2,
+          options: [
+            "Celkové ročné zrážky za minulý rok",
+            "Iba história servisných hlásení k pretekajúcemu kohútiku",
+            "Formálny rozhovor s trávnikom",
+            "Školský vodný rozpočet v kombinácii s údajmi z auditu únikov a pozorovaniami odtoku po búrkach"
+          ],
+          correct: 3
+        },
+        {
+          text: "Aké je najlepšie prvé opatrenie?",
+          points: 3,
+          options: [
+            "Opraviť úniky A súbežne navrhnúť pilotný plán zachytávania dažďovej vody / zlepšenia priepustných povrchov",
+            "Opraviť pretekajúci kohútik a považovať vec za vyriešenú",
+            "Spustiť celoškolskú osvetovú kampaň pred akoukoľvek infraštruktúrnou zmenou",
+            "Držať vigíliu za trávnik"
+          ],
+          correct: 0
+        },
+        {
+          text: "Ktorý krok v oblasti opatrení je najvhodnejší?",
+          points: 1,
+          options: [
+            "Zverejniť anonymnú kritiku vedenia školy online",
+            "Počkať s otvorením problému do ďalšieho rozpočtového cyklu",
+            "Predložiť dôkazy vedeniu školy a správe budov spolu s merateľným akčným plánom",
+            "Zinscenovať dramatické čítanie účtu za vodu pri sviečkach"
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "Ide o viacvrstvový problém starostlivosti: únik, chýbajúce zachytávanie a nepriepustný povrch spolu vysvetľujú údaje. Jednorazová oprava jednej príčiny by systém ponechala prevažne nefunkčný. Správnym krokom je paralelná infraštruktúrna práca plus zdokumentovaný plán.",
+      perfectLine: "Praktické, merateľné a príjemne bez prázdnej symboliky."
+    }
+  ];
+
+  // ============================================================
+  // REASONING HINTS — one per question. Free, optional.
+  // The pedagogical contract:
+  //   - Never name the correct option's wording.
+  //   - Never name the diagnostic term that is the answer.
+  //   - Point attention to evidence already on screen.
+  //   - Suggest elimination logic where useful.
+  //   - Pose the question the team should ask itself.
+  //   - Stay dry, short, age-appropriate.
+  // Hint TEXT may contain <strong>/<em> HTML — authored content only.
+  // ============================================================
+  const ROUNDS_HINTS = [
+    // Round 1 — Po daždi (EASY)
+    [
+      "Najprv prišiel silný dážď. Potom sa naraz zmenili tri veci: zakalenejšia voda, odpad pri vpustoch, rýchlejší prúd. Aký fyzikálny proces spôsobí všetky tri veci, keď voda narazí na spevnený povrch? Rieky nemajú názory. Slanosť ani kyslík nie sú v údajoch.",
+      "Užitočný dôkaz musí byť <strong>merateľný</strong> a zároveň <strong>priamo spojený s otázkou</strong>. Úhrn zrážok je skutočný údaj, ale hovorí, čo spadlo z oblohy — nie čo vstúpilo do potoka. Hľadajte možnosť, ktorá zachytáva, <em>čo</em> sa zmenilo aj <em>kde</em>.",
+      "Vyšetrovanie sa vždy začína hľadaním zdroja <em>pred</em> vydávaním bezpečnostných tvrdení alebo odkladaním rozhodnutí. Listy počasiu sú milé, ale neúčinné. Tri možnosti úplne preskakujú krok hľadania zdroja.",
+      "Vyberte publikum, ktoré má právomoc konať aj priamy záujem o tento potok. Turistické agentúry, dramatické krúžky a skupinové chaty sú dekorácia."
+    ],
+    // Round 2 — Zelený povrch, málo kyslíka (EASY)
+    [
+      "Teplo a nízky ranný kyslík sú skutočné, ale samy o sebe nenamaľujú na vodu zelený povlak. V údajoch je hodnota fosforečnanov — ktorá diagnóza <em>vyžaduje</em> túto zložku? Ryby sú síce výrazné, ale neorganizujú sa.",
+      "Priraďte viditeľné príznaky k chemickým údajom. Dve hodnoty v dátach hovoria za všetko. Jedálne lístky a vietor z minulého mesiaca nie.",
+      "Kvitnutie neopravíte pridaním mydla, odstránením rastlín ani vyjednávaním s riasami. Myslite na <em>kontrolu zdroja</em>: kde živina vstupuje do systému a ktoré opatrenie tento vstup <em>znižuje</em>?",
+      "Správna komunikácia označí <em>možnosť</em>, odporučí <em>opatrnosť</em> a počká na laboratórne výsledky. Dve možnosti priamo klamú — každá opačným smerom. Jedna je len nezdvorilá k rybám."
+    ],
+    // Round 3 — Festivalový odplav (MEDIUM)
+    [
+      "Pozrite sa na tabuľku údajov: pH, kyslík, vodivosť — všetko normálne. Iba jeden parameter prudko stúpol za 24 hodín. Búrková erózia by sa prejavila zákalom a sedimentom. Ťažké kovy alebo eutrofizácia by sa prejavili v chemických údajoch. Dáta ukazujú inam.",
+      "Užitočný dôkaz tu znamená: <strong>kde</strong> odpad je, <strong>aký typ</strong> odpadu to je a <strong>kde</strong> sa hromadí. Fáza Mesiaca, vnútorná vlhkosť ani počty morských vtákov vám nepomôžu umiestniť ani jeden kôš.",
+      "Príliv a odliv presúvajú plávajúci odpad — neodstraňujú ho. Reakcia, ktorá zaznamenáva, čo odstraňuje, je dvakrát užitočnejšia než tá, ktorá to nerobí. Hľadajte možnosť, ktorá spája <em>akciu</em> s <em>údajmi</em>.",
+      "Vyberte partnera, ktorý má aj kontajnery, aj právomoc konať. Motivačné morské vtáky a fiktívne ministerstvá odpad nezbierajú."
+    ],
+    // Round 4 — Vyzerá v poriadku. Nie je. (MEDIUM)
+    [
+      "Oznámenie o prepade + čakajúci bakteriálny test + kúpacia oblasť stále v prevádzke. Tri nesprávne možnosti vyvolávajú každá inú diagnózu (iba sediment, ťažké kovy, nálada rýb). Aký druh kontaminácie konkrétne prináša <em>prepadová udalosť</em>? <em>Pomôcka:</em> nie je viditeľná okom.",
+      "Dôverujte laboratóriu a prevádzkovateľovi, nie svojim očiam. „Vyzerá čistá“ už pomýlilo celé generácie plavcov — a jedna z nesprávnych možností je v podstate práve to. Rozhodujúci dôkaz tu spája potvrdený <em>zdroj</em> s čakajúcim <em>testom</em>.",
+      "Keď výsledok testu ešte neprišiel, ale zdroj rizika je potvrdený, aká je cena tichého čakania oproti cene odporúčania opatrnosti? Žiadať baktérie, aby sa samy odhalili, pravdepodobne nebude fungovať; čakanie na usadenie sedimentu ignoruje, že baktérie sa nesprávajú ako bahno.",
+      "Komunikujte <strong>riziko</strong> a <strong>plán</strong>: časovo ohraničený, primeraný, úprimný. Nie „určite toxické navždy“, nie „vyzerá v poriadku“, nie „nemáme istotu, takže nepovieme nič“."
+    ],
+    // Round 5 — Proti prúdu, po prúde (HARD — cross-border)
+    [
+      "Tri možnosti zodpovedajú vždy <em>jednému kúsku</em> obrazu: „dva samostatné problémy“ sedí, ak sa pozeráte iba na rozdielnosť príznakov; „teplé estuárium“ sedí, ak sa pozeráte iba na teplo + nízky O₂. Iba jedna možnosť spája všetky tri kúsky do jedného reťazca príčiny a následku. (Protesty rýb, hoci energické, v dátach nie sú.)",
+      "Užitočným dôkazom je tu <strong>reťazec</strong>, nie jednotlivý izolovaný fakt. Samotný sediment hovorí o transporte, ale nie o zdroji hnojiva. Samotné príznaky v estuáriu hovoria, kde sa prejavuje poškodenie, ale nie čo ho spôsobilo. Dochádzka v škole s tým nesúvisí.",
+      "Prepojený problém si zaslúži prepojenú reakciu. Jedna možnosť považuje miesta za nesúvisiace; jedna odkladá vyšetrovanie proti prúdu; jedna je prísny list povodiu. Ktorá možnosť uznáva, že oba regióny zdieľajú jeden riečny systém a konajú <em>spoločne</em>?",
+      "Medzinárodná spolupráca je proces, nie pódium. Na poradí záleží: zdieľajú partneri dáta <em>na začiatku analýzy</em>, až po zverejnení výsledkov jedného tímu, alebo vôbec? „Najsilnejší prípad publikuje prvý“ znie efektívne, ale podkopáva prepojenú interpretáciu."
+    ],
+    // Round 6 — Škola ako povodie (HARD)
+    [
+      "Pozrite sa, čo údaje skutočne opisujú: únik, spevnený dvor, vysoký účet za vodu, chýbajúce zachytávanie dažďa, vysoký odtok. Únik je skutočný, ale JEDEN únik nevysvetlí odtok a chýbajúce zachytávanie. Pitie vody nie je v údajoch. Vtip o kolobehu vody je, nuž, vtip. Ktorá jediná odpoveď zahŕňa <em>všetky</em> dôkazy?",
+      "Najsilnejšie dôkazy tu žijú v <strong>tabuľkách</strong> — na zachytenie obrazu treba skombinovať aspoň tri číselné zdroje. Ročné zrážky sú príliš hrubý údaj. História hlásení iba ku kohútiku hovorí o jednej z troch príčin. Rozhovory s trávnikom málokedy prinášajú užitočné dáta.",
+      "Slogany, plagáty, vigílie a opravy iba jednej veci nemenia vodný profil areálu. Hľadajte možnosť, ktorá <em>mení fyzickú situáciu</em> na viac než jednom mieste naraz — niečo opraviť, niečo navrhnúť, niečo zdokumentovať — súbežne.",
+      "Skutočné opatrenia prechádzajú cez ľudí s právomocou, podporené číslami a konkrétnym plánom. Anonymná kritika obchádza ľudí, ktorí môžu zmenu schváliť. Čakanie na ďalší rozpočet obchádza naliehavosť. Ísť do národných novín obchádza všetkých, ktorých skutočne potrebujete získať na svoju stranu."
+    ]
+  ];
+
+  const HUMOR = {
+    waiting: [
+      "Oddelené tímy. Spoločné dôsledky.",
+      "Toto je pokojná časť povodia.",
+      "Voda nestratila záujem.",
+      "Súkromie je najslušnejšia forma stratégie.",
+      "Rieka pokračuje po prúde, ničím nerušená."
+    ],
+    reveal: [
+      "Dôkazy naďalej trvajú na presnosti.",
+      "Klasický prípad stretnutia príčiny s následkom.",
+      "Situácia je merateľná, čo býva málokedy ideálne.",
+      "To, čo nasleduje, nie je názor.",
+      "Dátam je jedno, čiu teóriu potvrdia."
+    ],
+    results: [
+      "Voda bola čistejšia než niektoré úvahy.",
+      "Ambiciózna teória. Dáta uprednostnili inú.",
+      "Nepodložená sebadôvera zostáva dekoratívna.",
+      "Niektoré dôkazy boli čítané pozorne. Iné skôr odhadované."
+    ],
+    hintAck: [
+      "Malé postrčenie, na účet podniku.",
+      "Čítať rieku znamená vyriešiť polovicu problému.",
+      "Pomôcka nasadená. Dáta stále robia svoju prácu.",
+      "Jedno postrčenie. Záver je stále váš.",
+      "Smer: použitý. Rozhodnutie: čaká."
+    ],
+    // Reaction beats — chosen by score-out-of-8.
+    // Cosmetic only; never displayed before scoring; never affects scoring.
+    reactionPerfect: [
+      "Dáta súhlasne prikývli.",
+      "Diagnóza: čistá. Príjemné vystupovanie: voliteľné.",
+      "Štyri zo štyroch. Rieka nemá čo dodať.",
+      "Na nerozoznanie od kľúča odpovedí.",
+      "Keby mala rieka pečiatku schválenia, bola by mokrá."
+    ],
+    reactionStrong: [   // 6–7 / 8
+      "Väčšina argumentácie držala vodu.",
+      "Solídne čítanie. Jedna poznámka pod čiarou.",
+      "Takmer celý obraz. Takmer.",
+      "Dosť blízko na to, aby rieka zostala zaujatá."
+    ],
+    reactionMixed: [    // 3–5 / 8
+      "Slušný stred. Dáta sú trpezlivé.",
+      "Trochu signálu, trochu šumu.",
+      "Výsledok, ktorý napraví pozorné opätovné čítanie.",
+      "Napoly správne je stále napoly niečo."
+    ],
+    reactionRough: [    // 1–2 / 8
+      "Rieka zaznamenala váš príspevok.",
+      "Teória: odvážna. Dáta: nepresvedčené.",
+      "Zaujímavá interpretácia, podaná energicky.",
+      "Z tohto sa vraj naučíme najviac."
+    ],
+    reactionZero: [     // 0 / 8
+      "Rieka zaznamenala váš príspevok a pokračovala ďalej.",
+      "Čistý dátový bod: nula z ôsmich.",
+      "Odvážna stratégia. Agresívne nesprávna.",
+      "Aj nesprávne odpovede boli ohromené."
+    ],
+    // Group-level lines for special results
+    groupAllPerfect: [
+      "Buď boli dáta štedré, alebo tímy výnimočné.",
+      "Tri perfektné kolá. Štatisticky drzé."
+    ],
+    groupAllZero: [
+      "Spoločné presvedčenie, spoločne pomýlené.",
+      "Kľúč odpovedí sa dnes večer cíti osamelo."
+    ],
+    groupTie: [
+      "Remíza. Rieka je neutrálna; tabuľka skóre súhlasila.",
+      "Na nerozoznanie. Štatisticky aj morálne."
+    ]
+  };
+
+  // Achievement medals — earned at game end, cosmetic only.
+  // Each medal has: id, label, icon, dryline (the flavor reveal text), test(team, allRounds, state)
+  const MEDALS = [
+    {
+      id: 'self_taught',
+      label: 'Samouci',
+      icon: '💡',
+      dryline: 'Vyhrali bez použitia jedinej pomôcky.',
+      test: (team) => team.totalHintsUsed === 0
+    },
+    {
+      id: 'otter',
+      label: 'Vydra',
+      icon: '🦦',
+      dryline: 'Dokončili hru bez minutia overovacieho žetónu.',
+      test: (team) => team.tokensEverUsed === 0
+    },
+    {
+      id: 'lab',
+      label: 'Laboratórium',
+      icon: '🔬',
+      dryline: 'Perfektní pri každej diagnostickej otázke.',
+      test: (team) => team.correctDiagnosis === 6
+    },
+    {
+      id: 'sensor',
+      label: 'Senzor',
+      icon: '📡',
+      dryline: 'Perfektní pri každej otázke o dôkazoch.',
+      test: (team) => team.correctEvidence === 6
+    },
+    {
+      id: 'citizen',
+      label: 'Občan',
+      icon: '🏛',
+      dryline: 'Perfektní pri každej občianskej otázke.',
+      test: (team) => team.correctCivic === 6
+    },
+    {
+      id: 'watershed',
+      label: 'Povodie',
+      icon: '🌊',
+      dryline: 'Zvládli cezhraničné kolo na jednotku.',
+      test: (team, state) => {
+        // Round index 4 is "Cezhraničné prepojenie"
+        const sub = state.allRoundResults && state.allRoundResults[4] && state.allRoundResults[4][team.id];
+        return sub && sub.gain === 8;
+      }
+    },
+    {
+      id: 'speedrun',
+      label: 'Rýchly priebeh',
+      icon: '⚡',
+      dryline: 'Zamykali odpovede rýchlo a často. Rieka nebola konzultovaná.',
+      test: (team) => team.fastLocks >= 3
+    },
+    {
+      id: 'streakmaster',
+      label: 'Majster série',
+      icon: '🔥',
+      dryline: 'Udržali sériu troch perfektných kôl za sebou.',
+      test: (team) => team.bestStreak >= 3
+    }
+  ];
+
+  function pickReaction(gain){
+    if (gain === 8) return rand(HUMOR.reactionPerfect);
+    if (gain >= 6)  return rand(HUMOR.reactionStrong);
+    if (gain >= 3)  return rand(HUMOR.reactionMixed);
+    if (gain >= 1)  return rand(HUMOR.reactionRough);
+    return rand(HUMOR.reactionZero);
+  }
+
+  const state = {
+    screen: 'home',
+    teamCount: 2,
+    roundIndex: 0,
+    teams: [],
+    submissions: {},
+    currentModalTeam: null,
+    timer: null,
+    timeLeft: 35,
+    audioEnabled: true,
+    ambientId: null,
+    audioCtx: null,
+    soundUnlocked: false
+  };
+
+  const el = {
+    screen: document.getElementById('screen'),
+    modalSpäťdrop: document.getElementById('modalSpäťdrop'),
+    modal: document.getElementById('modal'),
+    footerFlavor: document.getElementById('footerFlavor'),
+    audioToggle: document.getElementById('audioToggle'),
+    resetBtn: document.getElementById('resetBtn'),
+    howToBtn: document.getElementById('howToBtn')
+  };
+
+  function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+  function setFooter(text){ el.footerFlavor.textContent = text; }
+
+  function unlockAudio(){
+    if(state.soundUnlocked) return;
+    try{
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      state.soundUnlocked = true;
+    }catch(e){}
+  }
+
+  function tone(freq=440, dur=0.12, type='sine', gain=0.02, when=0){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const t0 = ctx.currentTime + when;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function noiseBurst(dur=0.2, gain=0.01){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){ data[i] = (Math.random()*2-1) * (1 - i/data.length); }
+    const src = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    const g = ctx.createGain();
+    g.gain.value = gain;
+    src.buffer = buffer;
+    src.connect(filter).connect(g).connect(ctx.destination);
+    src.start();
+  }
+
+  // Sliding pitch tone — perfect for sad-trombone effects
+  function slideTón(startFreq, endFreq, dur=0.6, type='sawtooth', gain=0.025, when=0){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const t0 = ctx.currentTime + when;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(startFreq, t0);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(40, endFreq), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function playClick(){ tone(550, 0.08, 'triangle', 0.016); }
+  function playRoll(){
+    noiseBurst(0.22, 0.011);
+    tone(170, 0.22, 'sine', 0.02);
+    tone(240, 0.20, 'triangle', 0.014, 0.03);
+  }
+  function playCorrect(){
+    // Brighter major-arpeggio sweep
+    tone(523, 0.14, 'sine', 0.020);          // C5
+    tone(659, 0.16, 'sine', 0.022, 0.06);    // E5
+    tone(784, 0.18, 'triangle', 0.018, 0.12);// G5
+    tone(1047, 0.22, 'sine', 0.014, 0.18);   // C6
+  }
+  // Perfect-round fanfare — short, victorious, dry-witty in vibe
+  function playPerfectFanfare(){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    // Mini fanfare: rising fifth → octave → high sparkle
+    tone(440, 0.10, 'triangle', 0.020, 0.00);  // A
+    tone(660, 0.10, 'triangle', 0.020, 0.10);  // E (5th up)
+    tone(880, 0.16, 'triangle', 0.022, 0.20);  // A (octave)
+    tone(1320, 0.22, 'sine', 0.018, 0.32);     // E (12th)
+    tone(1760, 0.28, 'sine', 0.014, 0.42);     // sparkle high A
+    // Soft thump underneath
+    tone(110, 0.30, 'sine', 0.015, 0.00);
+  }
+  function playWrong(){
+    tone(250, 0.20, 'sawtooth', 0.012);
+    tone(180, 0.28, 'triangle', 0.010, 0.03);
+  }
+  function playTransition(){
+    tone(310, 0.12, 'sine', 0.014);
+    tone(420, 0.20, 'triangle', 0.010, 0.06);
+  }
+  // Tick-tock: alternates high/low like a clock; gain scales with urgency.
+  // Called every second when timer ≤ 15. Below 5, the urgent version is used.
+  function playTick(urgent=false){
+    if (urgent){
+      // Sharper, louder, with a little dissonance
+      tone(1100, 0.04, 'square', 0.014);
+      tone(1650, 0.04, 'square', 0.008, 0.02);
+    } else {
+      // Soft wood-block style alternating beat
+      const isHi = (state.tickAlt = !state.tickAlt);
+      tone(isHi ? 880 : 740, 0.05, 'square', 0.008);
+    }
+  }
+  // Time-up: classic "wahh-wahh-wahh-waaaaaaaa" sad trombone slide.
+  // Three short descending blats followed by a longer terminal one.
+  function playTimeUp(){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    // Three little "wah" blats — descending notes
+    slideTón(440, 392, 0.18, 'sawtooth', 0.022, 0.00); // A4 → G4
+    slideTón(370, 330, 0.18, 'sawtooth', 0.022, 0.22); // F#4 → E4
+    slideTón(311, 277, 0.20, 'sawtooth', 0.022, 0.45); // D#4 → C#4
+    // Final long descending slump — the "waaaaaaa"
+    slideTón(277, 110, 0.85, 'sawtooth', 0.026, 0.70); // C#4 → A2
+    // Sympathetic harmonic touch on top
+    slideTón(554, 220, 0.85, 'triangle', 0.012, 0.70);
+  }
+  function ambientStart(){
+    if(!state.audioEnabled || !state.soundUnlocked || state.ambientId) return;
+    state.ambientId = setInterval(() => {
+      if(state.screen === 'final' || state.screen === 'home'){
+        tone(130, 1.5, 'sine', 0.002);
+        tone(196, 1.2, 'triangle', 0.0016, 0.18);
+      } else {
+        tone(110, 1.0, 'sine', 0.0017);
+        tone(165, 0.8, 'triangle', 0.0011, 0.12);
+      }
+    }, 3800);
+  }
+  function ambientStop(){
+    if(state.ambientId){ clearInterval(state.ambientId); state.ambientId = null; }
+  }
+
+  function resetGame(){
+    clearTimer();
+    state.screen = 'home';
+    state.teamCount = 2;
+    state.roundIndex = 0;
+    state.teams = [];
+    state.submissions = {};
+    state.currentModalTeam = null;
+    render();
+    setFooter("Povodie si naďalej všetko pamätá.");
+  }
+
+  function clearTimer(){
+    if(state.timer){ clearInterval(state.timer); state.timer = null; }
+  }
+
+  // Cosmetic team personas — chosen from a list, no scoring impact.
+  // Names are dry, observant, age-appropriate, slightly mythic.
+  const PERSONAS = [
+    { name: "Sedimenty",       icon: "🪨" },
+    { name: "Pobrežná rada",    icon: "🌿" },
+    { name: "Kyslíkové sovy",         icon: "🦉" },
+    { name: "Strážcovia povodia",   icon: "🛡" },
+    { name: "Sútok",          icon: "💠" },
+    { name: "Spolok prítokov",   icon: "🌊" },
+    { name: "Podenky",        icon: "🪰" },
+    { name: "Cech prameňov",    icon: "⛰" },
+    { name: "Audítori potoka",     icon: "📋" },
+    { name: "pH prúžok",        icon: "🧪" },
+    { name: "Odvodňovacia partia",       icon: "🕳" },
+    { name: "Vydry",          icon: "🦦" }
+  ];
+
+  function buildTeamInputs(count){
+    let html = '';
+    for(let i=0;i<count;i++){
+      const defaultPersona = PERSONAS[i % PERSONAS.length];
+      const optionsHtml = PERSONAS.map((p, idx) =>
+        `<option value="${escapeHtml(p.name)}" data-icon="${p.icon}" ${p === defaultPersona ? 'selected' : ''}>${p.icon} ${escapeHtml(p.name)}</option>`
+      ).join('') + `<option value="__custom__">✏️ Napíšeme vlastné…</option>`;
+      html += `
+      <div class="team-setup-row">
+        <label class="tiny" for="teamPersona${i}">Identita tímu ${String.fromCharCode(65+i)}</label>
+        <select id="teamPersona${i}" class="persona-select" data-team="${i}">${optionsHtml}</select>
+        <input id="teamName${i}" value="${escapeHtml(defaultPersona.name)}" maxlength="22" class="hidden-when-preset">
+        <input id="teamIcon${i}" type="hidden" value="${defaultPersona.icon}">
+      </div>`;
+    }
+    return html;
+  }
+
+  function renderHome(){
+    el.screen.innerHTML = `
+      <div class="hero hero-with-art">
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Warm sunrise sky -->
+              <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"  stop-color="#ffa388" stop-opacity="0.55"/>
+                <stop offset="40%" stop-color="#ffcd6e" stop-opacity="0.40"/>
+                <stop offset="80%" stop-color="#5ddfff" stop-opacity="0.20"/>
+              </linearGradient>
+              <!-- River gradient — fresh aqua to mint -->
+              <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0.4">
+                <stop offset="0%"   stop-color="#5ddfff" stop-opacity="0.92"/>
+                <stop offset="55%"  stop-color="#cdb3ff" stop-opacity="0.78"/>
+                <stop offset="100%" stop-color="#6ff5b1" stop-opacity="0.65"/>
+              </linearGradient>
+              <!-- Sun glow -->
+              <radialGradient id="sunGlow">
+                <stop offset="0%" stop-color="#ffd97a" stop-opacity="0.95"/>
+                <stop offset="60%" stop-color="#ffa388" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#ff7acf" stop-opacity="0"/>
+              </radialGradient>
+              <!-- Kayak/raft silhouette gradient -->
+              <linearGradient id="raftGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ff7acf"/>
+                <stop offset="100%" stop-color="#ffa388"/>
+              </linearGradient>
+              <linearGradient id="raftGrad2" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5ddfff"/>
+                <stop offset="100%" stop-color="#6ff5b1"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Sky wash -->
+            <rect x="0" y="0" width="800" height="380" fill="url(#skyGrad)" opacity="0.75"/>
+
+            <!-- Sun -->
+            <g class="hero-sun">
+              <circle cx="640" cy="135" r="115" fill="url(#sunGlow)" opacity="0.85"/>
+              <circle cx="640" cy="135" r="42" fill="#ffd97a" opacity="0.95"/>
+              <circle cx="640" cy="135" r="32" fill="#fff4d6" opacity="0.85"/>
+            </g>
+
+            <!-- Distant mountain silhouettes — three layers, warm to cool -->
+            <path d="M 0 280 L 60 240 L 120 270 L 180 230 L 250 260 L 320 235 L 400 270 L 470 250 L 540 290 L 620 260 L 700 285 L 800 265 L 800 380 L 0 380 Z"
+                  fill="#cdb3ff" opacity="0.32"/>
+            <path d="M 0 320 L 80 290 L 160 315 L 240 280 L 330 310 L 410 295 L 490 320 L 570 300 L 660 325 L 740 305 L 800 318 L 800 400 L 0 400 Z"
+                  fill="#5ddfff" opacity="0.30"/>
+            <path d="M 0 350 L 100 335 L 200 350 L 290 330 L 380 350 L 470 340 L 560 355 L 650 340 L 740 358 L 800 348 L 800 420 L 0 420 Z"
+                  fill="#6ff5b1" opacity="0.28"/>
+
+            <!-- Rolling hills closer -->
+            <path d="M 0 415 Q 200 380 400 410 T 800 405 L 800 600 L 0 600 Z"
+                  fill="#1f4868" opacity="0.55"/>
+            <path d="M 0 460 Q 180 430 380 460 T 800 455 L 800 600 L 0 600 Z"
+                  fill="#163450" opacity="0.65"/>
+
+            <!-- Main river — wide, flowing curve with subtle ripples -->
+            <path
+              d="M -30 470
+                 C 100 460, 180 490, 280 480
+                 S 420 460, 500 470
+                 C 580 478, 640 500, 720 495
+                 L 830 500
+                 L 830 560
+                 C 720 560, 640 545, 540 555
+                 S 380 575, 280 565
+                 C 180 555, 80 580, -30 570 Z"
+              fill="url(#riverGrad)" opacity="0.72"/>
+
+            <!-- River ripple lines -->
+            <g stroke="#ffffff" stroke-width="1" fill="none" opacity="0.35">
+              <path d="M 80 500 Q 130 495 180 502" stroke-linecap="round"/>
+              <path d="M 240 515 Q 290 510 340 518" stroke-linecap="round"/>
+              <path d="M 420 525 Q 470 520 520 528" stroke-linecap="round"/>
+              <path d="M 580 510 Q 630 505 680 512" stroke-linecap="round"/>
+              <path d="M 130 540 Q 180 535 230 542" stroke-linecap="round"/>
+              <path d="M 380 545 Q 430 540 480 548" stroke-linecap="round"/>
+            </g>
+
+            <!-- Two stylized rafts on the river — geometric, refined, no faces -->
+            <g class="hero-raft1">
+              <ellipse cx="220" cy="510" rx="38" ry="9" fill="url(#raftGrad)" opacity="0.92"/>
+              <rect x="206" y="494" width="28" height="10" rx="2" fill="#ff7acf" opacity="0.9"/>
+              <!-- two paddler silhouettes — abstract heads/torsos -->
+              <circle cx="212" cy="488" r="5" fill="#ffd97a"/>
+              <circle cx="228" cy="488" r="5" fill="#ffa388"/>
+              <!-- Paddles -->
+              <line x1="200" y1="488" x2="195" y2="478" stroke="#ffd97a" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="240" y1="488" x2="245" y2="478" stroke="#ffa388" stroke-width="1.6" stroke-linecap="round"/>
+            </g>
+
+            <g class="hero-raft2">
+              <ellipse cx="540" cy="538" rx="32" ry="7" fill="url(#raftGrad2)" opacity="0.92"/>
+              <rect x="528" y="525" width="24" height="9" rx="2" fill="#5ddfff" opacity="0.9"/>
+              <circle cx="534" cy="520" r="4.5" fill="#6ff5b1"/>
+              <circle cx="548" cy="520" r="4.5" fill="#5ddfff"/>
+              <line x1="524" y1="520" x2="519" y2="510" stroke="#6ff5b1" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="558" y1="520" x2="563" y2="510" stroke="#5ddfff" stroke-width="1.6" stroke-linecap="round"/>
+            </g>
+
+            <!-- Birds (V-shapes, peaceful) -->
+            <g stroke="#1f4868" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.58">
+              <path d="M 240 175 q 6 -5 12 0 q 6 -5 12 0"/>
+              <path d="M 320 200 q 5 -4 10 0 q 5 -4 10 0"/>
+              <path d="M 410 165 q 6 -5 12 0 q 6 -5 12 0"/>
+            </g>
+
+            <!-- Floating data-points (sun-glints on water) -->
+            <g class="hero-particles">
+              <circle cx="120" cy="490" r="1.6" fill="#fff4d6" opacity="0.85"/>
+              <circle cx="350" cy="495" r="1.4" fill="#fff4d6" opacity="0.75"/>
+              <circle cx="460" cy="485" r="1.5" fill="#fff4d6" opacity="0.80"/>
+              <circle cx="610" cy="500" r="1.3" fill="#fff4d6" opacity="0.7"/>
+              <circle cx="690" cy="510" r="1.4" fill="#fff4d6" opacity="0.75"/>
+              <circle cx="170" cy="540" r="1.5" fill="#5ddfff" opacity="0.65"/>
+              <circle cx="380" cy="550" r="1.3" fill="#cdb3ff" opacity="0.6"/>
+              <circle cx="620" cy="555" r="1.5" fill="#6ff5b1" opacity="0.6"/>
+              <!-- Floating petals/leaves drifting -->
+              <ellipse cx="280" cy="460" rx="2.5" ry="1.2" fill="#ffa388" opacity="0.65" transform="rotate(20 280 460)"/>
+              <ellipse cx="500" cy="475" rx="2.5" ry="1.2" fill="#ff7acf" opacity="0.6" transform="rotate(-15 500 475)"/>
+              <ellipse cx="660" cy="470" rx="2.5" ry="1.2" fill="#ffd97a" opacity="0.7" transform="rotate(35 660 470)"/>
+              <ellipse cx="80" cy="468" rx="2.5" ry="1.2" fill="#cdb3ff" opacity="0.6" transform="rotate(-25 80 468)"/>
+            </g>
+
+            <!-- A few clouds — wispy, optional -->
+            <g fill="#fff" opacity="0.18">
+              <ellipse cx="180" cy="120" rx="60" ry="8"/>
+              <ellipse cx="450" cy="80" rx="50" ry="6"/>
+              <ellipse cx="100" cy="200" rx="40" ry="5"/>
+            </g>
+          </svg>
+        </div>
+        <section class="panel hero-panel">
+          <div class="kicker">Guardians of our Waters • Misia pre viac tímov</div>
+          <h2 class="display-title hero-title">Waters Under Pressure</h2>
+          <div class="hero-subtitle">Strážcovia naživo</div>
+          <p class="lead">Vyladená tímová strategická hra pre tínedžerov. Čítajte environmentálne dôkazy, interpretujte realistické údaje o vode a robte čo najpresnejšie rozhodnutia pod tlakom. Žiadne subjektívne hodnotenie. Žiadne „vyhrá najlepší výkon“. Len veda, stratégia a dôsledky.</p>
+          <div class="chips">
+            <span class="chip">2–3 tímy</span>
+            <span class="chip">6 kôl</span>
+            <span class="chip">Iba objektívne bodovanie</span>
+            <span class="chip">Hrateľný prototyp v jednom súbore</span>
+          </div>
+          <div class="narration">
+            Vitajte v misii.<br>
+            V rôznych vodách sa menia znaky. Vaša úloha je teoreticky jednoduchá a prakticky nepohodlná:
+            čítať dôkazy, pochopiť tlak a správne reagovať.
+            Vodný systém neodmeňuje hluk. Odmeňuje pozornosť.
+          </div>
+          <div class="actions">
+            <button class="primary" id="startSetupBtn">Vytvoriť misiu</button>
+            <button id="openHowHome">Ako hrať</button>
+          </div>
+        </section>
+        <section class="panel soft stack hero-panel">
+          <div class="stat">
+            <div class="label">Najlepší režim hry</div>
+            <div class="value">Tímy so zdieľanou obrazovkou</div>
+            <div class="caption">Ideálne pre projekciu v triede, online vedené stretnutia alebo jedno zariadenie, ktoré si podávajú hovorcovia tímov.</div>
+          </div>
+          <div class="grid2">
+            <div class="stat">
+              <div class="label">Strategická vrstva</div>
+              <div class="value">Overovacie žetóny</div>
+              <div class="caption">Každý tím začína s dvoma indíciami, ktoré môže odomknúť v kritických momentoch.</div>
+            </div>
+            <div class="stat">
+              <div class="label">Priebeh kola</div>
+              <div class="value">Hod → Čítanie → Rozhodnutie → Vyhodnotenie</div>
+              <div class="caption">Jasný rytmus. Čisté napätie.</div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Tón</h3>
+            <p class="helper">Jemne ostrý, nikdy detinský. Humor je v rozprávaní, nie v bodovaní.</p>
+            <div class="pill-row">
+              <span class="chip">„Rieka predložila nové dôkazy.“</span>
+              <span class="chip">„Nepodložená sebadôvera zostáva dekoratívna.“</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    document.getElementById('startSetupBtn').onclick = () => { playClick(); renderSetup(); };
+    document.getElementById('openHowHome').onclick = () => { playClick(); renderHowTo(); };
+  }
+
+  function renderSetup(){
+    state.screen = 'setup';
+    el.screen.innerHTML = `
+      <div class="grid2">
+        <section class="panel">
+          <div class="kicker">Nastavenie misie</div>
+          <h2 style="margin-top:0">Vytvoriť novú hru</h2>
+          <div class="stack">
+            <div>
+              <label for="teamCount">Počet tímov</label>
+              <select id="teamCount">
+                <option value="2" ${state.teamCount===2?'selected':''}>2 tímy</option>
+                <option value="3" ${state.teamCount===3?'selected':''}>3 tímy</option>
+              </select>
+            </div>
+            <div id="teamNameWrap" class="stack">${buildTeamInputs(state.teamCount)}</div>
+            <div>
+              <label for="roundCount">Kolá</label>
+              <input id="roundCount" value="6" disabled>
+            </div>
+            <div class="actions">
+              <button class="primary" id="beginMissionBtn">Začať misiu</button>
+              <button id="backHomeBtn">Späť</button>
+            </div>
+          </div>
+        </section>
+        <section class="panel soft">
+          <h3 style="margin-top:0">Ako tento prototyp funguje</h3>
+          <div class="howto">
+            <ol>
+              <li>Vyberte 2 alebo 3 tímy a pomenujte ich.</li>
+              <li>Každé kolo sa začína riečnym hodom, ktorý určí typ výzvy.</li>
+              <li>Celá skupina číta tú istú kartu dôkazov.</li>
+              <li>Každý tím odpovedá súkromne, postupne, cez panel na celú obrazovku.</li>
+              <li>Každá otázka má jednu bezplatnú <strong>pomôcku na uvažovanie</strong> — postrčenie k premýšľaniu, nie odpoveď.</li>
+              <li>Voliteľne môžete minúť <strong>overovací žetón</strong> na jeden dodatočný dôkaz v kole.</li>
+              <li>Hra automaticky oboduje všetky odpovede a odhalí výsledky.</li>
+            </ol>
+            <div class="narration">
+              Táto verzia je najsilnejšia možná edícia v jednom súbore: úplná kampaň, zvukové efekty, strategické žetóny, bezplatné pomôcky na uvažovanie, série a vyladené audiovizuálne spracovanie. Skutočná živá verzia pre viac zariadení by potrebovala synchronizovanú backendovú službu.
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    document.getElementById('teamCount').onchange = (e) => {
+      state.teamCount = Number(e.target.value);
+      document.getElementById('teamNameWrap').innerHTML = buildTeamInputs(state.teamCount);
+      wirePersonaPickers();
+    };
+
+    function wirePersonaPickers(){
+      document.querySelectorAll('.persona-select').forEach(sel => {
+        const i = sel.dataset.team;
+        const nameInput = document.getElementById(`teamName${i}`);
+        const iconInput = document.getElementById(`teamIcon${i}`);
+        const sync = () => {
+          if (sel.value === '__custom__'){
+            nameInput.classList.remove('hidden-when-preset');
+            nameInput.value = '';
+            nameInput.placeholder = 'Názov vášho tímu…';
+            nameInput.focus();
+            iconInput.value = '🌐';
+          } else {
+            nameInput.classList.add('hidden-when-preset');
+            nameInput.value = sel.value;
+            const opt = sel.options[sel.selectedIndex];
+            iconInput.value = opt.dataset.icon || '🌊';
+          }
+        };
+        sel.addEventListener('change', () => { playClick(); sync(); });
+        // Initialize hidden-by-default state
+        if (sel.value !== '__custom__') nameInput.classList.add('hidden-when-preset');
+      });
+    }
+    wirePersonaPickers();
+
+    document.getElementById('backHomeBtn').onclick = () => { playClick(); resetGame(); };
+    document.getElementById('beginMissionBtn').onclick = () => {
+      playTransition();
+      unlockAudio();
+      ambientStart();
+      const teams = [];
+      for(let i=0;i<state.teamCount;i++){
+        const sel = document.getElementById(`teamPersona${i}`);
+        const customName = (document.getElementById(`teamName${i}`)?.value || '').trim();
+        const isCustom = sel && sel.value === '__custom__';
+        const name = isCustom ? (customName || `Tím ${String.fromCharCode(65+i)}`) : (sel ? sel.value : `Tím ${String.fromCharCode(65+i)}`);
+        const icon = (document.getElementById(`teamIcon${i}`)?.value) || '🌊';
+        teams.push({
+          id:i,
+          name: name,
+          icon: icon,
+          score:0,
+          tokens:2,
+          tokensEverUsed:0,
+          perfectRounds:0,
+          correctDiagnosis:0,
+          correctAction:0,
+          correctEvidence:0,
+          correctCivic:0,
+          streak:0,
+          bestStreak:0,
+          hintFreeRounds:0,
+          totalHintsUsed:0,
+          fastLocks:0,
+          medals:[]
+        });
+      }
+      state.teams = teams;
+      state.roundIndex = 0;
+      state.submissions = {};
+      renderOpening();
+    };
+  }
+
+  function renderHowTo(){
+    state.screen = 'howto';
+    el.screen.innerHTML = `
+      <div class="grid2">
+        <section class="panel">
+          <div class="kicker">Ako hrať</div>
+          <h2 style="margin-top:0">Pravidlá misie</h2>
+          <div class="howto">
+            <ol>
+              <li>Každé kolo sa začína <strong>riečnym hodom</strong>. Ten určí typ výzvy.</li>
+              <li>Zobrazí sa <strong>karta dôkazov</strong> s pozorovaniami a údajmi o vode.</li>
+              <li>Každý tím odpovedá na <strong>4 otázky s výberom odpovede</strong>.</li>
+              <li>Každá odpoveď sa boduje automaticky. Hra nikdy nežiada subjektívne hodnotenie.</li>
+              <li>Každá otázka má jednu bezplatnú <strong>💡 pomôcku na uvažovanie</strong> — postrčenie k premýšľaniu, nie odpoveď. Za jej použitie nie je žiadna bodová penalizácia.</li>
+              <li>Každý tím môže počas celej misie použiť <strong>2 overovacie žetóny</strong> na odhalenie jedného dodatočného dôkazu v kole.</li>
+              <li>Získavajte perfektné kolá za sebou a vytvorte <strong>🔥 sériu</strong>. Perfektné kolá bez použitia pomôcok získajú odznak <strong>BEZ POMOCI</strong>.</li>
+            </ol>
+          </div>
+          <div class="panel soft" style="margin-top:14px">
+            <h3 style="margin-top:0">Bodovanie</h3>
+            <table class="table">
+              <tr><th>Správna diagnóza</th><td>+2</td></tr>
+              <tr><th>Správna voľba dôkazu</th><td>+2</td></tr>
+              <tr><th>Správne prvé opatrenie</th><td>+3</td></tr>
+              <tr><th>Správna voľba komunikácie / spolupráce / opatrenia</th><td>+1</td></tr>
+              <tr><th>Maximum za kolo</th><td>8</td></tr>
+            </table>
+          </div>
+          <div class="actions">
+            <button class="primary" id="howStartBtn">${state.teams.length ? 'Späť do hry' : 'Vytvoriť misiu'}</button>
+            <button id="howSpäťBtn">Späť</button>
+          </div>
+        </section>
+        <section class="panel soft">
+          <h3 style="margin-top:0">Typy výziev</h3>
+          <div class="stack">
+            ${Object.entries(TYPES).map(([name, t]) => `
+              <div class="stat">
+                <div class="label">${escapeHtml(name)}</div>
+                <div class="value" style="font-size:22px">${escapeHtml(t.icon)} ${escapeHtml(name)}</div>
+                <div class="caption">${escapeHtml(t.desc)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="flavor">Nie ste tu na to, aby ste zneli pôsobivo. Ste tu na to, aby ste mali pravdu.</div>
+        </section>
+      </div>
+    `;
+    document.getElementById('howStartBtn').onclick = () => {
+      playClick();
+      if(state.teams.length){ renderCurrentFlow(); } else { renderSetup(); }
+    };
+    document.getElementById('howSpäťBtn').onclick = () => {
+      playClick();
+      if(state.teams.length){ renderCurrentFlow(); } else { renderHome(); }
+    };
+  }
+
+  function renderOpening(){
+    state.screen = 'opening';
+    setFooter("Dáta si začínajú vytvárať názory.");
+    el.screen.innerHTML = `
+      <section class="panel center">
+        <div class="kicker">Inštruktáž misie</div>
+        <h2 class="display-title" style="font-size:44px">Misia pripravená</h2>
+        <div class="narration" style="max-width:820px; margin:0 auto 18px; text-align:left">
+          V rôznych vodách sa menia znaky.<br><br>
+          Vaša úloha je teoreticky jednoduchá a prakticky nepohodlná:
+          čítať dôkazy, pochopiť tlak a správne reagovať.<br><br>
+          Vodný systém neodmeňuje hluk. Odmeňuje pozornosť.
+        </div>
+        <div class="score-strip">
+          ${state.teams.map(team => `
+            <div class="team-card">
+              <h4><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+              <div class="meta">
+                <span>Skóre strážcov: <strong>${team.score}</strong></span>
+                <span class="token">Overovacie žetóny: ${team.tokens}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="actions" style="justify-content:center">
+          <button class="primary" id="startRoundOneBtn">Začať 1. kolo</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('startRoundOneBtn').onclick = () => {
+      playTransition();
+      renderRoundIntro();
+    };
+  }
+
+  function renderScoreStrip(){
+    return `
+      <div class="score-strip">
+        ${state.teams.map(team => `
+          <div class="team-card">
+            <h4><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+            <div class="meta">
+              <span>Skóre <strong>${team.score}</strong></span>
+              <span class="token">Overenie ${team.tokens}</span>
+              <span>Perfektné kolá <strong>${team.perfectRounds}</strong></span>
+              ${team.streak >= 2 ? `<span class="streak-chip hot"><span class="flame">🔥</span>${team.streak}× séria</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderRoundIntro(){
+    state.screen = 'roundIntro';
+    const round = ROUNDS[state.roundIndex];
+    state.submissions = {};
+    setFooter("Pripravuje sa incident...");
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel center">
+        <div class="kicker">Kolo ${state.roundIndex + 1} z ${ROUNDS.length}</div>
+        <h2 class="display-title" style="font-size:42px">${escapeHtml(round.title)}</h2>
+        <div class="round-type">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+        <div class="narration" style="max-width:700px; margin:22px auto 12px">
+          Skenujú sa aktuálne podmienky...<br>
+          Kontroluje sa nedávny tlak...<br>
+          Načítavajú sa dôkazy...
+        </div>
+        <div class="actions" style="justify-content:center">
+          <button class="primary" id="toRollBtn">Spustiť riečny hod</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('toRollBtn').onclick = () => {
+      playRoll();
+      renderRoll();
+    };
+  }
+
+  function renderRoll(){
+    state.screen = 'roll';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(rand(HUMOR.reveal));
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel roll-stage">
+        <div class="kicker">Riečny hod</div>
+        <div class="die-wrap">
+          <div class="die rolling" id="die">${escapeHtml(TYPES[round.type].icon)}</div>
+        </div>
+        <div class="type-name" id="typeName">Určuje sa typ výzvy...</div>
+        <div class="subtle" id="typeDesc">Čítajú sa aktuálne podmienky. Rieka vám priniesla problém. Aké pozorné.</div>
+        <div class="actions center" style="justify-content:center">
+          <button class="primary hidden" id="revealEvidenceBtn">Odhaliť dôkazy</button>
+        </div>
+      </section>
+    `;
+    const seq = ["Terénny test","Varovanie pred znečistením","Rýchla reakcia","Správa komunite","Cezhraničné prepojenie","Okno pre opatrenia"];
+    let idx = 0;
+    const typeName = document.getElementById('typeName');
+    const typeDesc = document.getElementById('typeDesc');
+    const die = document.getElementById('die');
+    const spinTimer = setInterval(() => {
+      const t = TYPES[seq[idx % seq.length]];
+      die.textContent = t.icon;
+      typeName.textContent = seq[idx % seq.length];
+      typeDesc.textContent = t.desc;
+      idx++;
+      playTick();
+    }, 180);
+
+    setTimeout(() => {
+      clearInterval(spinTimer);
+      die.classList.remove('rolling');
+      die.textContent = TYPES[round.type].icon;
+      typeName.textContent = round.type;
+      typeDesc.textContent = TYPES[round.type].desc;
+      document.getElementById('revealEvidenceBtn').classList.remove('hidden');
+      document.getElementById('revealEvidenceBtn').onclick = () => {
+        playTransition();
+        renderEvidence();
+      };
+    }, 1850);
+  }
+
+  function renderEvidence(){
+    state.screen = 'evidence';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(round.flavor);
+    const crossBorderNote = round.type === "Cezhraničné prepojenie"
+      ? `<div class="clue-box">Toto kolo používa rozdelené dôkazy. Každý tím uvidí počas svojho súkromného odpovedania dodatočný panel špecifický pre tím.</div>` : '';
+    // Reading-the-data tips: meta-skill cues that never spoil any specific round.
+    // One is shown per round, rotating by round index. They teach how to think with data.
+    const READING_TIPS = [
+      "<strong>Čítanie dát:</strong> porovnajte každú hodnotu s jej východiskom. <em>Smer zmeny</em> je dôležitejší než absolútne číslo.",
+      "<strong>Čítanie dát:</strong> hľadajte, čo sa zmenilo a čo nie. Stabilné parametre sú tiež dôkaz — vylučujú diagnózy.",
+      "<strong>Čítanie dát:</strong> jedna anomálna hodnota je indícia, nie rozsudok. Hľadajte dva alebo tri signály, ktoré ukazujú rovnakým smerom.",
+      "<strong>Čítanie dát:</strong> načasovanie zmeny zvyčajne ukazuje na jej príčinu. Čo sa stalo v hodinách pred tým, než sa hodnoty posunuli?",
+      "<strong>Čítanie dát:</strong> niektoré hodnoty <em>chýbajú</em> zámerne. Čakajúce testy a chýbajúci monitoring sú signály — všimnite si, čo ešte nevidíte.",
+      "<strong>Čítanie dát:</strong> najlacnejšie opatrenie býva zriedka nesprávne — preskúmajte, zdokumentujte, potom rozhodnite. Hlučné reakcie bez dôkazov zle starnú."
+    ];
+    const tip = READING_TIPS[state.roundIndex % READING_TIPS.length];
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Karta dôkazov</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="round-type">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+          </div>
+          <div class="panel soft" style="padding:14px; min-width:250px">
+            <div class="tiny">Lokalita</div>
+            <div style="font-weight:700; margin-bottom:8px">${escapeHtml(round.location)}</div>
+            <div class="tiny">Nedávne podmienky</div>
+            <div>${escapeHtml(round.conditions)}</div>
+          </div>
+        </div>
+        ${crossBorderNote}
+        <div class="reading-tip">${tip}</div>
+        <div class="evidence-layout">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Terénne pozorovania</h3>
+            <ul class="list">
+              ${round.observations.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Nedávne údaje</h3>
+            <div class="metric-grid">
+              ${Object.entries(round.data).map(([k,v]) => `
+                <div class="metric">
+                  <div class="m-label">${escapeHtml(k)}</div>
+                  <div class="m-value">${escapeHtml(v)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="flavor">${escapeHtml(round.flavor)}</div>
+        <div class="actions">
+          <button class="primary" id="openDecisionBtn">Otvoriť tímové rozhodnutia</button>
+          <button id="backToRollBtn">Späť</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('openDecisionBtn').onclick = () => { playClick(); renderDecisionHub(); };
+    document.getElementById('backToRollBtn').onclick = () => { playClick(); renderRoll(); };
+  }
+
+  function renderDecisionHub(){
+    state.screen = 'decision';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(rand(HUMOR.waiting));
+    const allDone = state.teams.every(t => state.submissions[t.id]);
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Tímové rozhodnutia</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="subtle">Každý tím odpovedá súkromne a postupne. Po odoslaní sú odpovede skryté.</div>
+          </div>
+          <div class="panel soft" style="padding:14px; max-width:340px">
+            <div class="tiny">Pripomienka</div>
+            <div>Sebadôvera je vítaná. Nepodložená sebadôvera je dekoratívna.</div>
+          </div>
+        </div>
+        <div class="decision-grid">
+          ${state.teams.map(team => {
+            const sub = state.submissions[team.id];
+            return `
+            <div class="submit-card">
+              <div class="status-pill ${sub ? 'status-done' : 'status-pending'}">${sub ? 'Odoslané' : 'Čaká sa'}</div>
+              <h3 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h3>
+              <div class="helper">Zostávajúce overovacie žetóny: <strong>${team.tokens}</strong></div>
+              ${sub ? `
+                <div class="panel soft" style="margin-top:12px; padding:12px">
+                  Odpovede zamknuté. ${sub.usedClue ? 'V tomto kole bola použitá dodatočná indícia.' : 'Nebola použitá žiadna dodatočná indícia.'}
+                </div>
+              ` : `
+                <div class="actions">
+                  <button class="primary openTeamBtn" data-team="${team.id}">Otvoriť súkromný panel</button>
+                </div>
+              `}
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="actions">
+          <button class="success" id="revealResultsBtn" ${allDone ? '' : 'disabled'}>Odhaliť výsledky</button>
+          <button id="backEvidenceBtn">Späť k dôkazom</button>
+        </div>
+      </section>
+    `;
+    document.querySelectorAll('.openTeamBtn').forEach(btn => {
+      btn.onclick = () => {
+        playClick();
+        openTeamModal(Number(btn.dataset.team));
+      };
+    });
+    document.getElementById('revealResultsBtn').onclick = () => {
+      if(!allDone) return;
+      playTransition();
+      computeRound();
+      renderResolution();
+    };
+    document.getElementById('backEvidenceBtn').onclick = () => { playClick(); renderEvidence(); };
+  }
+
+  function teamSpecificPanel(round, teamId){
+    if(round.type !== "Cezhraničné prepojenie") return '';
+    const info = round.teamSpecific[teamId] || round.teamSpecific[0];
+    return `
+      <div class="clue-box">
+        <strong>${escapeHtml(info.label)}</strong>
+        <ul class="list" style="margin-top:10px">
+          ${info.lines.map(line => `<li>${escapeHtml(line)}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  function openTeamModal(teamId){
+    clearTimer();
+    const round = ROUNDS[state.roundIndex];
+    const team = state.teams.find(t => t.id === teamId);
+    const N = round.questions.length;
+    const existing = state.submissions[teamId] || {
+      answers: Array(N).fill(null),
+      usedClue:false,
+      hintsUsed: Array(N).fill(false)
+    };
+    // Defensive: always size hintsUsed to match the round's question count
+    if(!Array.isArray(existing.hintsUsed) || existing.hintsUsed.length !== N){
+      const old = existing.hintsUsed || [];
+      existing.hintsUsed = Array(N).fill(false).map((_, i) => !!old[i]);
+    }
+    state.currentModalTeam = teamId;
+    state.timeLeft = 35;
+
+    const hintsForRound = ROUNDS_HINTS[state.roundIndex] || [];
+
+    el.modal.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <div class="kicker">Súkromný panel odpovedí</div>
+          <h2 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h2>
+          <div class="subtle">${escapeHtml(round.title)} • ${escapeHtml(round.type)}</div>
+        </div>
+        <div class="timer">
+          <div class="tiny">Zostávajúci čas</div>
+          <div class="num" id="modalTimerNum">35</div>
+        </div>
+      </div>
+      ${teamSpecificPanel(round, teamId)}
+      <div id="extraClueArea"></div>
+      <div class="actions" style="margin-bottom:16px">
+        <button id="useClueBtn" class="warn" ${team.tokens < 1 || existing.usedClue ? 'disabled' : ''}>Použiť overovací žetón (${team.tokens})</button>
+        <button id="closeModalBtn">Zavrieť</button>
+      </div>
+      <div class="stack">
+        ${round.questions.map((q, qi) => {
+          const hintText = hintsForRound[qi] || "";
+          const used = existing.hintsUsed[qi];
+          return `
+          <div class="question" data-q="${qi}">
+            <div class="q-title">${qi+1}. ${escapeHtml(q.text)} <span class="subtle">(+${q.points})</span></div>
+            ${hintText ? `
+              <button type="button" class="hint-btn ${used ? 'used' : ''}" data-hint="${qi}" ${used ? 'disabled' : ''}>
+                <span class="lamp">💡</span>
+                <span>${used ? 'Pomôcka zobrazená' : 'Potrebujete indíciu?'}</span>
+              </button>
+              <div class="hint-reveal" id="hintReveal${qi}" style="${used ? '' : 'display:none'}">${hintText}</div>
+            ` : ''}
+            <div class="options">
+              ${q.options.map((opt, oi) => `
+                <label class="option ${existing.answers[qi]===oi ? 'selected' : ''}">
+                  <input type="radio" name="q${qi}" value="${oi}" ${existing.answers[qi]===oi ? 'checked' : ''}>
+                  <span class="mark">●</span>
+                  <span>${escapeHtml(opt)}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="actions">
+        <button class="primary" id="lockAnswersBtn">Zamknúť odpovede</button>
+      </div>
+      <div class="caption">Pomôcky sú bezplatné a nikdy neznižujú skóre. Po odoslaní sa odpovede nedajú zmeniť.</div>
+    `;
+    el.modalSpäťdrop.classList.add('show');
+
+    function renderExtraClue(){
+      const area = document.getElementById('extraClueArea');
+      if(existing.usedClue){
+        area.innerHTML = `<div class="clue-box"><strong>Overovacia indícia odomknutá:</strong> ${escapeHtml(round.extraClue)}</div>`;
+      } else {
+        area.innerHTML = '';
+      }
+    }
+    renderExtraClue();
+
+    document.querySelectorAll('.option input').forEach(input => {
+      input.addEventListener('change', () => {
+        playClick();
+        input.closest('.question').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        input.closest('.option').classList.add('selected');
+      });
+    });
+
+    // Hint button handlers — free, one per question, no penalty
+    document.querySelectorAll('.hint-btn').forEach(btn => {
+      btn.onclick = () => {
+        const qi = Number(btn.dataset.hint);
+        if(existing.hintsUsed[qi]) return;
+        existing.hintsUsed[qi] = true;
+        const reveal = document.getElementById(`hintReveal${qi}`);
+        if(reveal) reveal.style.display = 'block';
+        btn.classList.add('used');
+        btn.disabled = true;
+        btn.querySelector('span:last-child').textContent = 'Pomôcka zobrazená';
+        // soft, friendly tone — not the success sound
+        tone(420, 0.10, 'sine', 0.014);
+        tone(560, 0.14, 'triangle', 0.012, 0.05);
+        setFooter(rand(HUMOR.hintAck));
+      };
+    });
+
+    document.getElementById('useClueBtn').onclick = () => {
+      if(team.tokens < 1 || existing.usedClue) return;
+      playTransition();
+      team.tokens -= 1;
+      existing.usedClue = true;
+      renderExtraClue();
+      document.getElementById('useClueBtn').disabled = true;
+      document.getElementById('useClueBtn').textContent = `Použiť overovací žetón (${team.tokens})`;
+    };
+    document.getElementById('closeModalBtn').onclick = () => {
+      playClick();
+      saveDraftAnswers(teamId, existing);
+      closeModal();
+    };
+    document.getElementById('lockAnswersBtn').onclick = () => {
+      playClick();
+      const answers = collectModalAnswers(round.questions.length);
+      const fastLock = state.timeLeft >= 15 && answers.every(a => a !== null);
+      state.submissions[teamId] = { answers, usedClue: existing.usedClue, hintsUsed: existing.hintsUsed.slice(), fastLock };
+      closeModal();
+      renderDecisionHub();
+      if(state.teams.every(t => state.submissions[t.id])) {
+        setFooter("Všetky tímy odoslali odpovede. Dôkazy sa čoskoro stanú veľmi konkrétnymi.");
+      }
+    };
+
+    state.timer = setInterval(() => {
+      state.timeLeft -= 1;
+      const timerEl = document.getElementById('modalTimerNum');
+      if(timerEl){
+        timerEl.textContent = String(state.timeLeft);
+        // Visual urgency cue — color shifts as time drains
+        if (state.timeLeft <= 5){
+          timerEl.classList.add('timer-critical');
+          timerEl.classList.remove('timer-warn');
+        } else if (state.timeLeft <= 15){
+          timerEl.classList.add('timer-warn');
+          timerEl.classList.remove('timer-critical');
+        } else {
+          timerEl.classList.remove('timer-warn','timer-critical');
+        }
+      }
+      // Tick-tock starts at 15s, becomes urgent under 5s
+      if (state.timeLeft <= 5 && state.timeLeft > 0) playTick(true);
+      else if (state.timeLeft <= 15 && state.timeLeft > 0) playTick(false);
+      if(state.timeLeft <= 0){
+        clearTimer();
+        playTimeUp();
+        const answers = collectModalAnswers(round.questions.length);
+        state.submissions[teamId] = { answers, usedClue: existing.usedClue, hintsUsed: existing.hintsUsed.slice() };
+        // Brief visual flash before closing
+        if (timerEl){ timerEl.textContent = "0"; timerEl.classList.add('timer-up'); }
+        setTimeout(() => {
+          closeModal();
+          renderDecisionHub();
+        }, 1200); // let sad trombone breathe
+      }
+    }, 1000);
+  }
+
+  function collectModalAnswers(count){
+    const answers = [];
+    for(let i=0;i<count;i++){
+      const checked = el.modal.querySelector(`input[name="q${i}"]:checked`);
+      answers.push(checked ? Number(checked.value) : null);
+    }
+    return answers;
+  }
+
+  function saveDraftAnswers(teamId, existing){
+    const answers = collectModalAnswers(ROUNDS[state.roundIndex].questions.length);
+    const anyHints = (existing.hintsUsed || []).some(h => h);
+    state.submissions[teamId] = (existing.usedClue || anyHints || answers.some(a => a !== null))
+      ? { answers, usedClue: existing.usedClue, hintsUsed: (existing.hintsUsed || []).slice(), draft:true }
+      : undefined;
+    if(state.submissions[teamId] && state.submissions[teamId].draft){
+      delete state.submissions[teamId];
+    }
+  }
+
+  function closeModal(){
+    clearTimer();
+    el.modalSpäťdrop.classList.remove('show');
+    el.modal.innerHTML = '';
+    state.currentModalTeam = null;
+  }
+
+  function computeRound(){
+    const round = ROUNDS[state.roundIndex];
+    if(!state.allRoundResults) state.allRoundResults = {};
+    state.allRoundResults[state.roundIndex] = {};
+    state.teams.forEach(team => {
+      const submission = state.submissions[team.id] || { answers: [] };
+      let gain = 0;
+      const detail = round.questions.map((q, i) => {
+        const correct = submission.answers[i] === q.correct;
+        if(correct) gain += q.points;
+        if(i===0 && correct) team.correctDiagnosis += 1;
+        if(i===1 && correct) team.correctEvidence += 1;
+        if(i===2 && correct) team.correctAction += 1;
+        if(i===3 && correct) team.correctCivic += 1;
+        return { correct, answer: submission.answers[i], correctIndex: q.correct, points: q.points };
+      });
+      team.score += gain;
+      const isPerfect = gain === 8;
+      if(isPerfect) team.perfectRounds += 1;
+      // streak: consecutive perfect (8/8) rounds. Obnoviťs on any miss.
+      if(isPerfect){
+        team.streak += 1;
+        if(team.streak > team.bestStreak) team.bestStreak = team.streak;
+      } else {
+        team.streak = 0;
+      }
+      // hint-free badge: perfect round AND no hints used
+      const hintsUsed = (submission.hintsUsed || []).some(h => h);
+      const hintFreePerfect = isPerfect && !hintsUsed;
+      if(hintFreePerfect) team.hintFreeRounds += 1;
+      // Aggregate counters for end-game medals
+      const hintsUsedThisRound = (submission.hintsUsed || []).filter(h => h).length;
+      team.totalHintsUsed += hintsUsedThisRound;
+      if(submission.usedClue) team.tokensEverUsed += 1;
+      if(submission.fastLock) team.fastLocks += 1;
+      submission.gain = gain;
+      submission.detail = detail;
+      submission.isPerfect = isPerfect;
+      submission.hintsUsedAny = hintsUsed;
+      submission.hintFreePerfect = hintFreePerfect;
+      submission.reaction = pickReaction(gain);
+      // Snapshot for medal history
+      state.allRoundResults[state.roundIndex][team.id] = {
+        gain, isPerfect, hintsUsedAny: hintsUsed, hintFreePerfect,
+        reaction: submission.reaction
+      };
+    });
+  }
+
+  function renderResolution(){
+    state.screen = 'resolution';
+    const round = ROUNDS[state.roundIndex];
+    const perfectTeams = state.teams.filter(t => state.submissions[t.id]?.gain === 8);
+    const anyPerfect = perfectTeams.length > 0;
+    const allPerfect = perfectTeams.length === state.teams.length;
+    const allZero = state.teams.every(t => state.submissions[t.id]?.gain === 0);
+    // Audio choice — louder fanfare when there's a perfect; subtler when there isn't
+    if (allPerfect && state.teams.length > 1){
+      playPerfectFanfare();
+      setTimeout(() => playPerfectFanfare(), 380); // double fanfare
+    } else if (anyPerfect){
+      playPerfectFanfare();
+    } else {
+      playWrong();
+    }
+    // Footer line: special-case group humor
+    if (allPerfect && state.teams.length > 1) setFooter(rand(HUMOR.groupAllPerfect));
+    else if (allZero) setFooter(rand(HUMOR.groupAllZero));
+    else setFooter(rand(HUMOR.results));
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Výsledky kola</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="subtle">${escapeHtml(round.explanation)}</div>
+          </div>
+          <div class="panel soft" style="max-width:280px">
+            <div class="tiny">Typ kola</div>
+            <div class="round-type" style="margin-top:8px">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+          </div>
+        </div>
+
+        <div class="resolution-grid">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Správne odpovede</h3>
+            ${round.questions.map((q,i) => {
+              const hintText = (ROUNDS_HINTS[state.roundIndex] || [])[i] || "";
+              return `
+              <div class="answer-key-item">
+                <div class="pts">Q${i+1} • +${q.points}</div>
+                <div style="font-weight:700; margin:6px 0">${escapeHtml(q.text)}</div>
+                <div><strong>Správna odpoveď:</strong> ${escapeHtml(q.options[q.correct])}</div>
+                ${hintText ? `<div class="hint-recap"><span class="lamp">💡</span> <em>Uvažovanie:</em> ${hintText}</div>` : ''}
+              </div>
+            `;}).join('')}
+            <div class="flavor">${escapeHtml(round.flavor)}</div>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Výsledky tímov</h3>
+            ${state.teams.map(team => {
+              const sub = state.submissions[team.id];
+              const streakChip = team.streak >= 2
+                ? `<span class="streak-chip hot"><span class="flame">🔥</span>${team.streak}-kolová séria</span>`
+                : (team.bestStreak >= 2 ? `<span class="streak-chip">Najlepšia séria: ${team.bestStreak}</span>` : '');
+              const hintFreeBadge = sub.hintFreePerfect ? `<span class="perfect-badge">BEZ POMOCI</span>` : '';
+              return `
+                <div class="result-team">
+                  <div style="display:flex; justify-content:space-between; gap:12px; align-items:center">
+                    <div>
+                      <h4 style="margin:0"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)} ${hintFreeBadge}</h4>
+                      <div class="caption">
+                        Diagnóza ${sub.detail[0].correct ? '✓' : '✕'} •
+                        Dôkazy ${sub.detail[1].correct ? '✓' : '✕'} •
+                        Opatrenie ${sub.detail[2].correct ? '✓' : '✕'} •
+                        Občianske ${sub.detail[3].correct ? '✓' : '✕'}
+                      </div>
+                    </div>
+                    <div class="gain ${sub.gain > 0 ? 'positive' : ''}">+${sub.gain}</div>
+                  </div>
+                  <div class="caption">Celkové skóre: ${team.score}</div>
+                  ${sub.reaction ? `<div class="reaction-beat">${escapeHtml(sub.reaction)}</div>` : ''}
+                  ${streakChip ? `<div class="streak-row">${streakChip}</div>` : ''}
+                </div>
+              `;
+            }).join('')}
+            ${state.teams.some(t => state.submissions[t.id].gain === 8) ? `<div class="narration">${escapeHtml(round.perfectLine)}</div>` : `<div class="narration">Súbor údajov naznačil úspešnejšie usporiadanie volieb.</div>`}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="nextStepBtn">${state.roundIndex < ROUNDS.length - 1 ? 'Ďalšie kolo' : 'Konečné výsledky'}</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('nextStepBtn').onclick = () => {
+      playTransition();
+      if(state.roundIndex < ROUNDS.length - 1){
+        state.roundIndex += 1;
+        state.submissions = {};
+        renderRoundIntro();
+      } else {
+        renderFinal();
+      }
+    };
+  }
+
+  function rankTeams(){
+    return [...state.teams].sort((a,b) => 
+      b.score - a.score ||
+      b.perfectRounds - a.perfectRounds ||
+      b.correctAction - a.correctAction
+    );
+  }
+
+  function renderFinal(){
+    state.screen = 'final';
+    const ranked = rankTeams();
+    const winner = ranked[0];
+    setFooter("Dobrá veda. Dobrý úsudok. Lepšia voda.");
+    playCorrect();
+    el.screen.innerHTML = `
+      <section class="panel">
+        <div class="kicker">Misia dokončená</div>
+        <div class="winner center">
+          <h2 class="display-title" style="font-size:48px; margin-bottom:8px">${escapeHtml(winner.name)} vyhráva</h2>
+          <div class="big-score">${winner.score}</div>
+          <div class="subtle">Najvyššie skóre strážcov</div>
+          <div class="flavor" style="max-width:760px; margin:18px auto 0">${escapeHtml(winner.name)} interpretoval/a dôkazy najpresnejšie a prijal/a najsilnejšie celkové rozhodnutia počas celej misie.</div>
+        </div>
+
+        <div class="grid2" style="margin-top:18px">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Konečné poradie</h3>
+            <table class="table">
+              <thead><tr><th>Poradie</th><th>Tím</th><th>Skóre</th><th>Perfektné</th><th>Najlepšia séria</th><th>Bez pomoci</th></tr></thead>
+              <tbody>
+                ${ranked.map((team, idx) => `
+                  <tr>
+                    <td>${idx+1}</td>
+                    <td><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</td>
+                    <td>${team.score}</td>
+                    <td>${team.perfectRounds}</td>
+                    <td>${team.bestStreak}${team.bestStreak >= 2 ? ' 🔥' : ''}</td>
+                    <td>${team.hintFreeRounds}${team.hintFreeRounds > 0 ? ' ✨' : ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="caption" style="margin-top:8px">
+              <strong>Bez pomoci</strong> = perfektné kolá dosiahnuté bez použitia pomôcok na uvažovanie. <strong>Séria</strong> = po sebe idúce perfektné kolá. Oboje slúži na chválenie, nie na úpravu skóre.
+            </div>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Úspechy</h3>
+            <div class="caption" style="margin-bottom:12px">Kozmetické medaily — nemenia poradie.</div>
+            ${ranked.map(team => {
+              const earnedMedals = MEDALS.filter(m => {
+                try { return m.test(team, state); } catch(e){ return false; }
+              });
+              team.medals = earnedMedals.map(m => m.id);
+              return `
+                <div class="result-team" style="margin-bottom:12px">
+                  <h4 style="margin:0 0 6px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+                  ${earnedMedals.length === 0
+                    ? `<div class="caption" style="font-style:italic">V tejto hre žiadne medaily. Rieka si to zapamätá.</div>`
+                    : `<div class="medals-row">${earnedMedals.map(m => `<span class="medal" title="${escapeHtml(m.dryline)}"><span class="ico">${m.icon}</span>${escapeHtml(m.label)}</span>`).join('')}</div>
+                       <div class="caption" style="margin-top:8px">${earnedMedals.map(m => '<em style="color:#ffe9c2">' + m.icon + '</em> ' + escapeHtml(m.dryline)).join('<br>')}</div>`
+                  }
+                </div>`;
+            }).join('')}
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Analytika misie</h3>
+            ${ranked.map(team => `
+              <div class="result-team">
+                <h4 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+                <div class="caption">Správne diagnózy: ${team.correctDiagnosis}</div>
+                <div class="caption">Správne voľby dôkazov: ${team.correctEvidence}</div>
+                <div class="caption">Správne voľby opatrení: ${team.correctAction}</div>
+                <div class="caption">Správne občianske/politické voľby: ${team.correctCivic}</div>
+                <div class="caption">Použité pomôcky: ${team.totalHintsUsed} • Minuté overovacie žetóny: ${team.tokensEverUsed}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="narration" style="margin-top:18px">
+          Misia je dokončená.<br><br>
+          Niektoré rozhodnutia systém zlepšili. Niektoré len zneli energicky.
+          Dôležité je, že dôkazy boli prečítané, voľby urobené a voda bola považovaná za niečo, čo stojí za pochopenie.
+          To je silný začiatok.
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="playAgainBtn">Hrať znova</button>
+          <button id="homeBtn">Späť na úvod</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('playAgainBtn').onclick = () => {
+      playTransition();
+      state.roundIndex = 0;
+      state.teams.forEach(t => {
+        t.score = 0; t.tokens = 2; t.perfectRounds = 0;
+        t.correctDiagnosis = 0; t.correctAction = 0; t.correctEvidence = 0; t.correctCivic = 0;
+        t.streak = 0; t.bestStreak = 0; t.hintFreeRounds = 0;
+        t.tokensEverUsed = 0; t.totalHintsUsed = 0; t.fastLocks = 0; t.medals = [];
+      });
+      state.submissions = {};
+      state.allRoundResults = {};
+      renderOpening();
+    };
+    document.getElementById('homeBtn').onclick = () => {
+      playClick();
+      resetGame();
+    };
+  }
+
+  function renderCurrentFlow(){
+    switch(state.screen){
+      case 'setup': return renderSetup();
+      case 'opening': return renderOpening();
+      case 'roundIntro': return renderRoundIntro();
+      case 'roll': return renderRoll();
+      case 'evidence': return renderEvidence();
+      case 'decision': return renderDecisionHub();
+      case 'resolution': return renderResolution();
+      case 'final': return renderFinal();
+      default: return renderHome();
+    }
+  }
+
+  function render(){
+    if(state.screen === 'home') renderHome();
+    else renderCurrentFlow();
+  }
+
+  el.audioToggle.onclick = () => {
+    unlockAudio();
+    state.audioEnabled = !state.audioEnabled;
+    if(state.audioEnabled){ ambientStart(); playClick(); }
+    else ambientStop();
+    el.audioToggle.textContent = `Audio: ${state.audioEnabled ? 'zapnutý' : 'vypnutý'}`;
+  };
+  el.resetBtn.onclick = () => { playClick(); resetGame(); };
+  el.howToBtn.onclick = () => { playClick(); renderHowTo(); };
+  el.modalSpäťdrop.addEventListener('click', (e) => {
+    if(e.target === el.modalSpäťdrop){
+      closeModal();
+      renderDecisionHub();
+    }
+  });
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && state.currentModalTeam !== null){
+      closeModal();
+      renderDecisionHub();
+    }
+  });
+  document.body.addEventListener('pointerdown', unlockAudio, { once: true });
+  render();
+})();
+</script>
+</body>
+</html>

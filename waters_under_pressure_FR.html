@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waters Under Pressure : Gardiens en direct</title>
+<style>
+  :root{
+    /* Lighter, optimistic background — softer "morning over water" instead of midnight */
+    --bg1:#0e2030;
+    --bg2:#163450;
+    --bg3:#1f4868;
+    --panel:rgba(18,40,62,0.74);
+    --panel2:rgba(28,56,84,0.86);
+    --panel3:rgba(255,255,255,0.07);
+    --line:rgba(255,255,255,0.14);
+    --text:#f1f7ff;
+    --muted:#bcd2e3;
+    /* Brighter, friendlier accents */
+    --cyan:#5ddfff;       /* sky-bright cyan */
+    --green:#6ff5b1;      /* fresh mint */
+    --amber:#ffcd6e;      /* soft sunny gold */
+    --red:#ff8095;        /* warm coral-pink */
+    --violet:#cdb3ff;     /* soft lavender */
+    --coral:#ffa388;      /* peachy coral accent */
+    --magenta:#ff7acf;    /* warm pink for celebrations */
+    --shadow:0 18px 48px rgba(0,0,0,.35);
+    --radius:22px;
+    --radiusSm:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--text);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:
+      /* Top-left peach warm glow */
+      radial-gradient(circle at 12% 12%, rgba(255,163,136,.14), transparent 32%),
+      /* Top-right lavender */
+      radial-gradient(circle at 88% 14%, rgba(205,179,255,.13), transparent 30%),
+      /* Mid-right cyan pop */
+      radial-gradient(circle at 92% 50%, rgba(93,223,255,.14), transparent 32%),
+      /* Lower-left mint */
+      radial-gradient(circle at 18% 78%, rgba(111,245,177,.12), transparent 30%),
+      /* Lower-right warm pink */
+      radial-gradient(circle at 82% 88%, rgba(255,122,207,.10), transparent 32%),
+      /* Base — lighter dusk-to-sky gradient */
+      linear-gradient(180deg, #1d3b5c 0%, var(--bg1) 55%, #081a2c 100%);
+    overflow:hidden;
+  }
+  .bg-waves{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden;
+  }
+  .wave{
+    position:absolute; left:-15%; width:130%; height:220px; border-radius:45%;
+    background:linear-gradient(180deg, rgba(93,223,255,.10), rgba(255,255,255,0));
+    filter:blur(10px);
+    animation:drift 16s ease-in-out infinite;
+  }
+  .wave.w1{bottom:8%; animation-duration:20s; opacity:.55; background:linear-gradient(180deg, rgba(93,223,255,.12), rgba(255,255,255,0));}
+  .wave.w2{bottom:0%; animation-duration:28s; opacity:.4; transform:scaleX(1.05); background:linear-gradient(180deg, rgba(205,179,255,.10), rgba(255,255,255,0));}
+  .wave.w3{bottom:-6%; animation-duration:34s; opacity:.30; background:linear-gradient(180deg, rgba(111,245,177,.08), rgba(255,255,255,0));}
+  @keyframes drift{
+    0%,100%{transform:translateX(0) translateY(0)}
+    50%{transform:translateX(4%) translateY(-10px)}
+  }
+
+  .app{
+    position:relative;
+    height:100%;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    gap:16px;
+    padding:18px;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; z-index:2;
+  }
+  .brand{
+    display:flex; align-items:center; gap:14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--line);
+    padding:12px 16px; border-radius:18px; box-shadow:var(--shadow);
+    backdrop-filter:blur(10px);
+  }
+  .brand-icon{
+    width:44px; height:44px; border-radius:14px; display:grid; place-items:center;
+    background:linear-gradient(180deg, rgba(116,230,255,.18), rgba(182,166,255,.08));
+    border:1px solid rgba(116,230,255,.18);
+    color:var(--cyan); font-size:24px; text-shadow:0 0 18px rgba(116,230,255,.25);
+  }
+  .brand h1{
+    margin:0; font-size:18px; letter-spacing:.02em;
+  }
+  .brand small{color:var(--muted); display:block; margin-top:2px; font-size:12px}
+  .top-controls{display:flex; gap:10px; flex-wrap:wrap}
+  button, .btn{
+    border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 16px;
+    font:inherit;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+  }
+  button:hover,.btn:hover{transform:translateY(-1px); border-color:rgba(95,217,255,.45)}
+  button:active,.btn:active{transform:translateY(1px)}
+  button.primary,.btn.primary{
+    background:linear-gradient(135deg, rgba(95,217,255,.30), rgba(196,168,255,.18));
+    border-color:rgba(95,217,255,.50);
+    color:#f5fbff;
+    font-weight:700;
+  }
+  button.primary:hover,.btn.primary:hover{
+    background:linear-gradient(135deg, rgba(95,217,255,.40), rgba(196,168,255,.28));
+    border-color:rgba(95,217,255,.75);
+    box-shadow:0 0 22px rgba(95,217,255,.25), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.success{
+    background:linear-gradient(135deg, rgba(92,242,168,.30), rgba(95,217,255,.16));
+    border-color:rgba(92,242,168,.45);
+    font-weight:700;
+  }
+  button.success:hover{
+    box-shadow:0 0 22px rgba(92,242,168,.25), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.warn{
+    background:linear-gradient(135deg, rgba(255,198,107,.28), rgba(255,157,122,.14));
+    border-color:rgba(255,198,107,.45);
+    font-weight:700;
+  }
+  button.warn:hover{
+    box-shadow:0 0 22px rgba(255,198,107,.22), 0 8px 20px rgba(0,0,0,.20);
+  }
+  button.ghost{
+    background:rgba(255,255,255,.03);
+  }
+  button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:0 8px 20px rgba(0,0,0,.15) !important}
+
+  main{
+    min-height:0;
+    display:grid;
+    place-items:center;
+    z-index:1;
+  }
+  .screen{
+    width:min(1200px, 100%);
+    max-height:100%;
+    overflow:auto;
+    background:linear-gradient(180deg, rgba(8,18,30,.55), rgba(8,18,30,.72));
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(16px);
+    padding:28px;
+  }
+  .hero{
+    display:grid;
+    grid-template-columns:1.3fr .95fr;
+    gap:22px;
+    align-items:stretch;
+  }
+
+  /* === Home screen art layer === */
+  .hero-with-art{
+    position:relative;
+    isolation:isolate;
+  }
+  .hero-art{
+    position:absolute;
+    inset:-30px -30px -20px -30px;
+    z-index:-1;
+    pointer-events:none;
+    overflow:hidden;
+    border-radius:32px;
+    /* Soft vignette to fade edges and protect text readability */
+    -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,.4) 75%, rgba(0,0,0,0) 100%);
+    mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,.4) 75%, rgba(0,0,0,0) 100%);
+  }
+  .hero-art svg{
+    width:100%; height:100%;
+    /* Subtle drift animation makes the scene feel alive */
+    animation: heroArtDrift 30s ease-in-out infinite alternate;
+    opacity:0.78;
+  }
+  .hero-art .hero-sun{
+    transform-origin: 640px 135px;
+    animation: sunBreathe 6s ease-in-out infinite;
+  }
+  @keyframes sunBreathe{
+    0%,100%{transform: scale(1); opacity: 1;}
+    50%{transform: scale(1.06); opacity: 0.92;}
+  }
+  .hero-art .hero-raft1{
+    animation: raftBob1 7s ease-in-out infinite;
+    transform-origin: 220px 510px;
+  }
+  .hero-art .hero-raft2{
+    animation: raftBob2 9s ease-in-out infinite;
+    transform-origin: 540px 538px;
+  }
+  @keyframes raftBob1{
+    0%,100%{transform: translate(0,0) rotate(0deg);}
+    50%{transform: translate(8px, -2px) rotate(-1.2deg);}
+  }
+  @keyframes raftBob2{
+    0%,100%{transform: translate(0,0) rotate(0deg);}
+    50%{transform: translate(-6px, -1px) rotate(1.5deg);}
+  }
+  .hero-art .hero-particles circle,
+  .hero-art .hero-particles ellipse{
+    animation: particleFloat 7s ease-in-out infinite;
+  }
+  .hero-art .hero-particles > *:nth-child(2n){animation-duration:9s; animation-delay:1.5s}
+  .hero-art .hero-particles > *:nth-child(3n){animation-duration:11s; animation-delay:.7s}
+  .hero-art .hero-particles > *:nth-child(5n){animation-duration:8s; animation-delay:2.3s}
+  @keyframes heroArtDrift{
+    0%   {transform: translate(0px, 0px) scale(1.0);}
+    50%  {transform: translate(8px, -4px) scale(1.02);}
+    100% {transform: translate(-6px, 3px) scale(1.0);}
+  }
+  @keyframes particleFloat{
+    0%,100%{transform: translate(0,0); opacity:.5;}
+    33%    {transform: translate(8px, -10px); opacity:.9;}
+    66%    {transform: translate(-6px, -16px); opacity:.55;}
+  }
+
+  /* Hero panel itself: slightly more transparent to let the art breathe through behind */
+  .hero-panel{
+    background: linear-gradient(135deg, rgba(13,28,46,0.88) 0%, rgba(20,42,66,0.92) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 24px 60px rgba(0,0,0,.35);
+    position:relative;
+    z-index:1;
+  }
+
+  /* Hero title with vibrant gradient — the "wow" moment */
+  .hero-title{
+    background: linear-gradient(135deg, #5fd9ff 0%, #c4a8ff 45%, #ff9d7a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    /* Subtle text shadow fallback for non-supporting browsers */
+    text-shadow: 0 0 30px rgba(95,217,255,.20);
+    animation: titleGlow 5s ease-in-out infinite alternate;
+  }
+  @keyframes titleGlow{
+    0%   {filter: drop-shadow(0 0 0px rgba(95,217,255,0));}
+    100% {filter: drop-shadow(0 0 18px rgba(196,168,255,0.35));}
+  }
+  .hero-subtitle{
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 600;
+    color: var(--cyan);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+    opacity: 0.92;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .panel.soft{background:rgba(255,255,255,.045)}
+  .panel h2,.panel h3,.panel h4{margin:0 0 12px}
+  .kicker{
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--cyan); font-size:12px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .display-title{
+    font-size:clamp(34px, 5vw, 58px);
+    line-height:1.02; margin:0 0 14px;
+  }
+  .lead{
+    color:var(--muted);
+    font-size:18px; line-height:1.55; max-width:62ch; margin:0 0 18px;
+  }
+  .tiny{font-size:12px; color:var(--muted)}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px}
+  .chip{
+    padding:8px 12px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--muted); font-size:13px;
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .stack{display:grid; gap:14px}
+  .stat{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+  }
+  .stat .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  .stat .value{font-size:30px; margin-top:6px; font-weight:800}
+  label{display:block; margin-bottom:8px; color:var(--muted); font-size:13px}
+  input, select{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.18);
+    color:var(--text);
+    padding:13px 14px;
+    font:inherit;
+    outline:none;
+  }
+  input:focus, select:focus{border-color:rgba(116,230,255,.44); box-shadow:0 0 0 3px rgba(116,230,255,.10)}
+  .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+  .howto{
+    display:grid;
+    gap:14px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .howto ol{padding-left:20px; margin:0}
+  .howto li{margin:8px 0}
+  .round-header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
+  }
+  .score-strip{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;
+  }
+  .team-card{
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+    min-width:0;
+  }
+  .team-card h4{margin:0 0 6px; font-size:16px}
+  .team-card .meta{display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:13px}
+  .token{
+    padding:4px 8px; border-radius:999px; background:rgba(116,230,255,.10); border:1px solid rgba(116,230,255,.22); color:var(--cyan)
+  }
+  .round-type{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:999px;
+    background:rgba(116,230,255,.09); border:1px solid rgba(116,230,255,.22); color:var(--cyan); font-weight:700;
+  }
+  .evidence-layout{
+    display:grid; grid-template-columns:1.1fr .9fr; gap:18px;
+  }
+  .list{
+    display:grid; gap:10px; padding:0; margin:0;
+  }
+  .list li{
+    list-style:none; padding:11px 13px; border-radius:14px;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  }
+  .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .metric{
+    padding:12px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid var(--line)
+  }
+  .metric .m-label{font-size:12px; color:var(--muted)}
+  .metric .m-value{font-size:16px; font-weight:700; margin-top:4px}
+  .flavor{
+    margin-top:16px; color:#d6e9fb; font-style:italic; border-left:3px solid rgba(116,230,255,.3); padding-left:12px;
+  }
+  .roll-stage{
+    display:grid; place-items:center; gap:20px; min-height:340px; text-align:center;
+  }
+  .die-wrap{perspective:900px}
+  .die{
+    width:138px; height:138px; border-radius:26px;
+    display:grid; place-items:center;
+    background:linear-gradient(180deg, rgba(116,230,255,.20), rgba(182,166,255,.10));
+    border:1px solid rgba(116,230,255,.34);
+    box-shadow:0 0 42px rgba(116,230,255,.10), inset 0 0 18px rgba(255,255,255,.05);
+    font-size:62px;
+    transform-style:preserve-3d;
+  }
+  .die.rolling{animation:spin 1.8s cubic-bezier(.2,.75,.2,1)}
+  @keyframes spin{
+    0%{transform:rotateX(0deg) rotateY(0deg)}
+    30%{transform:rotateX(250deg) rotateY(210deg)}
+    60%{transform:rotateX(520deg) rotateY(470deg)}
+    100%{transform:rotateX(720deg) rotateY(690deg)}
+  }
+  .type-name{font-size:28px; font-weight:800}
+  .subtle{color:var(--muted)}
+  .decision-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .submit-card{
+    position:relative;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+  }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
+    border-radius:999px; font-size:12px; font-weight:700; margin-bottom:10px;
+    background:rgba(255,255,255,.06);
+  }
+  .status-pending{color:var(--amber); border:1px solid rgba(255,209,126,.22)}
+  .status-done{color:var(--green); border:1px solid rgba(125,242,180,.22)}
+  .question{
+    padding:14px;
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+  }
+  .q-title{font-weight:700; margin-bottom:12px}
+  .options{display:grid; gap:10px}
+  .option{
+    position:relative;
+    display:flex; gap:10px; align-items:flex-start;
+    padding:12px 12px 12px 44px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    cursor:pointer;
+    transition:border-color .16s ease, background .16s ease, transform .12s ease;
+  }
+  .option:hover{border-color:rgba(116,230,255,.33); transform:translateY(-1px)}
+  .option input{position:absolute; opacity:0; pointer-events:none}
+  .option .mark{
+    position:absolute; left:12px; top:12px; width:22px; height:22px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.20); display:grid; place-items:center; color:transparent;
+    background:rgba(0,0,0,.16);
+  }
+  .option.selected{
+    background:rgba(116,230,255,.10);
+    border-color:rgba(116,230,255,.40);
+  }
+  .option.selected .mark{
+    color:var(--cyan); border-color:rgba(116,230,255,.42);
+    box-shadow:0 0 0 4px rgba(116,230,255,.08);
+  }
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(2,8,14,.62); backdrop-filter:blur(6px); z-index:15;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-backdrop.show{display:flex}
+  .modal{
+    width:min(930px, 100%);
+    max-height:92vh;
+    overflow:auto;
+    background:linear-gradient(180deg, rgba(8,20,32,.96), rgba(8,20,32,.98));
+    border:1px solid var(--line);
+    border-radius:28px; box-shadow:var(--shadow); padding:24px;
+  }
+  .modal-header{
+    display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:18px;
+  }
+  .timer{
+    min-width:120px;
+    text-align:center;
+    padding:12px 14px; border-radius:16px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .timer .num{
+    font-size:28px; font-weight:800;
+    transition: color .25s ease, transform .15s ease;
+    color: var(--text);
+  }
+  .timer .num.timer-warn{
+    color: var(--amber);
+    animation: timerPulseWarn 1s ease-in-out infinite;
+  }
+  .timer .num.timer-critical{
+    color: var(--red);
+    animation: timerPulseCrit .5s ease-in-out infinite;
+  }
+  .timer .num.timer-up{
+    color: var(--red);
+    animation: timerUpShake .35s ease 0s 2;
+    transform: scale(1.15);
+  }
+  @keyframes timerPulseWarn{
+    0%,100%{transform: scale(1)}
+    50%{transform: scale(1.06); text-shadow: 0 0 16px rgba(255,198,107,.45)}
+  }
+  @keyframes timerPulseCrit{
+    0%,100%{transform: scale(1); text-shadow: 0 0 0 rgba(255,122,138,0)}
+    50%{transform: scale(1.10); text-shadow: 0 0 18px rgba(255,122,138,.65)}
+  }
+  @keyframes timerUpShake{
+    0%,100%{transform: scale(1.15) translateX(0)}
+    25%{transform: scale(1.15) translateX(-3px)}
+    75%{transform: scale(1.15) translateX(3px)}
+  }
+  .clue-box{
+    margin:14px 0 18px;
+    padding:14px;
+    border-radius:18px;
+    background:rgba(182,166,255,.10);
+    border:1px solid rgba(182,166,255,.25);
+    color:#e9e0ff;
+  }
+  /* === Reasoning Hint system === */
+  .hint-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; margin:6px 0 10px;
+    border-radius:12px;
+    background:rgba(125,242,180,.08);
+    border:1px solid rgba(125,242,180,.30);
+    color:#cdf5e0;
+    font-size:13px; font-weight:600;
+    cursor:pointer; user-select:none;
+    transition:transform .12s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    position:relative;
+  }
+  .hint-btn:not(.used)::before{
+    content:''; position:absolute; inset:-2px;
+    border-radius:14px; pointer-events:none;
+    box-shadow:0 0 0 0 rgba(125,242,180,.35);
+    animation:hintPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes hintPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(125,242,180,0)}
+    50%{box-shadow:0 0 0 4px rgba(125,242,180,.10)}
+  }
+  .hint-btn:hover{transform:translateY(-1px); background:rgba(125,242,180,.14); border-color:rgba(125,242,180,.5)}
+  .hint-btn:focus-visible{outline:2px solid var(--green); outline-offset:2px}
+  .hint-btn.used{background:rgba(255,255,255,.04); border-color:var(--line); color:var(--muted); cursor:default}
+  .hint-btn.used:hover{transform:none; background:rgba(255,255,255,.04); border-color:var(--line)}
+  .hint-btn.used::before{display:none}
+  .hint-btn .lamp{display:inline-block; transform:translateY(-1px)}
+  .hint-reveal{
+    margin:4px 0 14px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(125,242,180,.10), rgba(125,242,180,.04));
+    border:1px solid rgba(125,242,180,.28);
+    color:#dff6ea;
+    font-size:13.5px; line-height:1.55;
+    animation:hintSlide .35s ease;
+  }
+  .hint-reveal strong{color:var(--green); font-weight:700}
+  @keyframes hintSlide{
+    from{opacity:0; transform:translateY(-4px)}
+    to{opacity:1; transform:translateY(0)}
+  }
+  /* Streak / momentum chip */
+  .streak-row{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;
+  }
+  .streak-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid var(--line);
+    font-size:12px; color:var(--muted);
+  }
+  .streak-chip.hot{
+    background:linear-gradient(90deg, rgba(255,209,126,.18), rgba(255,133,133,.12));
+    border-color:rgba(255,209,126,.40);
+    color:#ffe4b3;
+    box-shadow:0 0 12px rgba(255,209,126,.18);
+  }
+  .streak-chip .flame{font-size:13px}
+  .perfect-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:999px;
+    background:rgba(116,230,255,.10); border:1px solid rgba(116,230,255,.35);
+    color:var(--cyan); font-size:12px; font-weight:700; letter-spacing:.04em;
+    margin-left:6px;
+  }
+  /* Reading-the-data tip box on the evidence screen */
+  .reading-tip{
+    margin:12px 0 18px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(116,230,255,.06), rgba(116,230,255,.02));
+    border:1px solid rgba(116,230,255,.22);
+    color:#dff0fb;
+    font-size:13.5px; line-height:1.55;
+  }
+  .reading-tip strong{color:var(--cyan); font-weight:700}
+  .reading-tip em{color:#cfe7ff; font-style:italic}
+
+  /* Persona picker */
+  .team-setup-row{display:flex; flex-direction:column; gap:6px}
+  .persona-select{
+    width:100%;
+    padding:10px 12px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    border-radius:12px;
+    color:var(--text);
+    font-size:14px;
+    font-family:inherit;
+    /* Critical: force native arrow visibility on dark bg */
+    background-image: linear-gradient(45deg, transparent 50%, var(--cyan) 50%),
+                      linear-gradient(135deg, var(--cyan) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right:32px;
+    cursor:pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .persona-select:hover{
+    border-color: rgba(95,217,255,.45);
+    background-color: rgba(95,217,255,.06);
+  }
+  .persona-select:focus{outline:2px solid var(--green); outline-offset:1px}
+  /* CRITICAL: option elements get system colors by default —
+     force dark bg + light text so the dropdown is readable on every browser */
+  .persona-select option{
+    background-color:#0e2237;
+    color:#edf6ff;
+    padding:8px;
+  }
+  .persona-select option:checked,
+  .persona-select option:hover{
+    background-color:#1a3a5a;
+    color:#5fd9ff;
+  }
+  .hidden-when-preset{display:none !important}
+  /* When the input is shown for custom names */
+  input.hidden-when-preset:not(.hidden-when-preset){
+    display:block !important;
+  }
+
+  /* Achievement medals on result screen */
+  .medals-row{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;
+  }
+  .medal{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 10px; border-radius:999px;
+    background:linear-gradient(135deg, rgba(255,209,126,.16), rgba(255,133,133,.10));
+    border:1px solid rgba(255,209,126,.42);
+    color:#ffe9c2; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+  }
+  .medal .ico{font-size:13px}
+
+  /* Reaction beat under team result */
+  .reaction-beat{
+    margin-top:8px;
+    font-size:12.5px;
+    color:#bcd4e0;
+    font-style:italic;
+    opacity:.85;
+  }
+  /* Team icon next to name */
+  .team-icon{
+    display:inline-block;
+    margin-right:6px;
+    font-size:1em;
+  }
+  .resolution-grid{
+    display:grid; grid-template-columns:1.05fr .95fr; gap:18px;
+  }
+  .answer-key-item{
+    padding:14px;
+    border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.04); margin-bottom:12px;
+  }
+  .answer-key-item .pts{color:var(--cyan); font-weight:700}
+  .hint-recap{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:rgba(125,242,180,.07);
+    border:1px dashed rgba(125,242,180,.30);
+    color:#cdf5e0;
+    font-size:13px; line-height:1.5;
+  }
+  .hint-recap .lamp{margin-right:4px}
+  .hint-recap em{color:var(--green); font-style:normal; font-weight:600}
+  .result-team{
+    border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.04); padding:16px; margin-bottom:12px;
+  }
+  .gain{font-size:28px; font-weight:800}
+  .gain.positive{color:var(--green)}
+  .table{
+    width:100%; border-collapse:collapse; font-size:14px;
+  }
+  .table th,.table td{padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left}
+  .table th{color:var(--muted); font-weight:600}
+  footer{
+    z-index:2;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    color:var(--muted); font-size:13px;
+  }
+  .footer-note{
+    background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
+  }
+  .hidden{display:none !important}
+  .center{text-align:center}
+  .big-score{
+    font-size:80px; font-weight:900; line-height:1; margin:4px 0 12px;
+    background:linear-gradient(180deg, #fff, #9beeff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .winner{
+    padding:20px; border-radius:24px; background:linear-gradient(180deg, rgba(125,242,180,.13), rgba(116,230,255,.08));
+    border:1px solid rgba(125,242,180,.28);
+  }
+  .narration{
+    padding:18px;
+    border-radius:18px;
+    border:1px solid rgba(116,230,255,.20);
+    background:linear-gradient(180deg, rgba(116,230,255,.07), rgba(255,255,255,.02));
+    color:#dfefff; line-height:1.7;
+  }
+  .pill-row{display:flex; flex-wrap:wrap; gap:10px}
+  .caption{font-size:12px; color:var(--muted); margin-top:6px}
+  .helper{color:var(--muted); line-height:1.55}
+  @media (max-width: 980px){
+    .hero,.evidence-layout,.resolution-grid{grid-template-columns:1fr}
+    .decision-grid,.score-strip,.grid3,.grid2{grid-template-columns:1fr}
+    .screen{padding:18px}
+    header,.round-header,footer{flex-direction:column; align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="bg-waves" aria-hidden="true">
+  <div class="wave w1"></div>
+  <div class="wave w2"></div>
+  <div class="wave w3"></div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-icon">◈</div>
+      <div>
+        <h1>Waters Under Pressure : Gardiens en direct</h1>
+        <small>Lisez les preuves. Prenez la décision. Protégez l’eau.</small>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="audioToggle" class="ghost">Audio : activé</button>
+      <button id="howToBtn" class="ghost">Comment jouer</button>
+      <button id="resetBtn" class="ghost">Réinitialiser</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="screen" class="screen"></div>
+  </main>
+
+  <footer>
+    <div class="footer-note">Édition prototype : version soignée en un seul fichier. Entièrement jouable. Idéale en classe avec écran partagé ou pour une partie animée en ligne.</div>
+    <div class="footer-note" id="footerFlavor">Le bassin versant continue de se souvenir de tout.</div>
+  </footer>
+</div>
+
+<div id="modalRetourdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+(() => {
+  const TYPES = {
+    "Test de terrain": { icon: "◌", color: "var(--cyan)", desc: "Choisissez la mesure la plus utile ou la preuve manquante." },
+    "Alerte pollution": { icon: "△", color: "var(--amber)", desc: "Identifiez la source ou le type de pression le plus probable." },
+    "Réponse rapide": { icon: "↯", color: "var(--red)", desc: "Choisissez la meilleure action immédiate." },
+    "Message à la communauté": { icon: "✦", color: "var(--violet)", desc: "Choisissez l’étape de communication la plus responsable." },
+    "Lien transfrontalier": { icon: "⟷", color: "var(--violet)", desc: "Reliez les preuves entre équipes ou lieux." },
+    "Fenêtre d’action publique": { icon: "▣", color: "var(--green)", desc: "Choisissez la réponse institutionnelle la plus efficace." }
+  };
+
+  const ROUNDS = [
+    // ====================================================================
+    // ROUND 1 — EASY. Clear evidence, distractors are mostly off-topic.
+    // Correct positions: 2, 0, 1, 3
+    // ====================================================================
+    {
+      type: "Test de terrain",
+      title: "Après la pluie",
+      location: "Ruisseau urbain près de l’école",
+      conditions: "Forte pluie 18 heures plus tôt",
+      observations: [
+        "L’eau est beaucoup plus trouble que d’habitude.",
+        "De petits amas de déchets sont visibles près des avaloirs pluviaux.",
+        "Le débit est plus rapide que la moyenne hebdomadaire."
+      ],
+      data: {
+        "Turbidité": "Sharply increased",
+        "Oxygène dissous": "Normal",
+        "pH": "Dans la plage normale",
+        "Nitrates": "Légèrement élevé"
+      },
+      flavor: "L’eau donne un retour. Il n’est pas subtil.",
+      extraClue: "Le panache de ruissellement est visiblement plus fort près d’un exutoire d’eaux pluviales.",
+      questions: [
+        {
+          text: "Quel est le problème principal le plus probable ?",
+          points: 2,
+          options: [
+            "Intrusion saline à long terme",
+            "Effondrement sévère de l’oxygène",
+            "Sédiments et ruissellement après la pluie",
+            "La rivière s’est fait une opinion"
+          ],
+          correct: 2
+        },
+        {
+          text: "Quelle preuve est la plus utile pour le moment ?",
+          points: 2,
+          options: [
+            "Niveau de turbidité et observations près des avaloirs pluviaux",
+            "Total des précipitations des dernières 24 heures",
+            "Pointure moyenne de l’équipe d’échantillonnage",
+            "L’humeur des oies locales"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Envoyer une lettre très ferme à la pluie",
+            "Étudier les trajets de ruissellement et les apports des avaloirs, puis refaire des tests en aval",
+            "Ignorer l’événement et attendre un mois",
+            "Remplacer les panneaux voisins avant de recueillir davantage de preuves"
+          ],
+          correct: 1
+        },
+        {
+          text: "Qui doit être informé en premier ?",
+          points: 1,
+          options: [
+            "Les agences de tourisme d’une autre ville",
+            "Le club de théâtre de l’école, au cas où cela inspirerait une pièce",
+            "Un groupe de discussion public au hasard",
+            "L’éco-équipe de l’école et l’autorité locale de l’eau"
+          ],
+          correct: 3
+          // Drama-club option = the dry-funny one. Tourist agencies and
+          // group chat are ordinary wrongs.
+        }
+      ],
+      explanation: "Forte pluie, turbidité élevée, débit plus rapide et déchets visibles près des avaloirs indiquent une pression liée au ruissellement plutôt qu’un effondrement de l’oxygène ou une acidification.",
+      perfectLine: "Excellent début. La rivière reste inquiète, mais impressionnée."
+    },
+
+    // ====================================================================
+    // ROUND 2 — EASY-MEDIUM. One distractor is plausible (warm-water fish kill).
+    // Correct positions: 1, 3, 0, 2
+    // ====================================================================
+    {
+      type: "Alerte pollution",
+      title: "Surface verte, faible oxygène",
+      location: "Anse d’un lac près d’une zone de loisirs",
+      conditions: "Températures chaudes, pas de pluie importante depuis 6 jours",
+      observations: [
+        "Un film vert est visible à la surface de l’eau calme.",
+        "Des poissons sont observés près de la surface au lever du soleil.",
+        "Il y a peu de mouvement de l’eau dans l’anse."
+      ],
+      data: {
+        "Phosphates": "Élevé",
+        "Oxygène dissous": "Faible tôt le matin",
+        "pH": "Légèrement au-dessus de la plage habituelle",
+        "Turbidité": "Modéré"
+      },
+      flavor: "Le lac est entré dans son ère des algues. Personne n’y gagne.",
+      extraClue: "Une pelouse voisine a été fertilisée trois jours plus tôt.",
+      questions: [
+        {
+          text: "Quel est le problème principal le plus probable ?",
+          points: 2,
+          options: [
+            "Perte d’oxygène due à la chaleur seulement",
+            "Eutrophisation due à un enrichissement en nutriments",
+            "Fuite de métaux lourds liée à l’exploitation minière",
+            "Les poissons se syndiquent"
+          ],
+          correct: 1
+        },
+        {
+          text: "Quelle preuve est la plus utile pour le moment ?",
+          points: 2,
+          options: [
+            "Nombre de bancs près du lac",
+            "Direction du vent du mois dernier",
+            "Enquête sur la détresse émotionnelle des cygnes",
+            "Niveaux élevés de phosphates et faible oxygène dissous"
+          ],
+          correct: 3
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Réduire les apports de nutriments à la source, documenter la prolifération et alerter les autorités environnementales locales",
+            "Ajouter du savon pour disperser la couche de surface",
+            "Annoncer que la prolifération est sans danger sans confirmation",
+            "Demander poliment aux algues de partir"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quel est le message public le plus responsable ?",
+          points: 1,
+          options: [
+            "Le lac est certainement toxique.",
+            "Tout va bien. Ignorez la couche verte.",
+            "Possible prolifération d’algues détectée. Évitez le contact direct jusqu’à confirmation locale.",
+            "Les poissons réagissent probablement de façon excessive."
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "Des concentrations élevées de phosphates, un faible oxygène matinal et une prolifération visible en surface soutiennent fortement l’hypothèse d’une eutrophisation — la chaleur seule ne produirait pas le film vert.",
+      perfectLine: "Vous avez choisi la prudence, les preuves et la compétence. Une combinaison rare et précieuse."
+    },
+
+    // ====================================================================
+    // ROUND 3 — MEDIUM. Plausible distractors: tide, beach storm runoff.
+    // Correct positions: 3, 1, 0, 2
+    // ====================================================================
+    {
+      type: "Réponse rapide",
+      title: "Dérive du festival",
+      location: "Promenade côtière près d’une communauté scolaire",
+      conditions: "Forte fréquentation pendant le week-end",
+      observations: [
+        "Les déchets plastiques à usage unique sont concentrés près des entrées de drainage.",
+        "Le vent pousse les déchets flottants vers l’anse.",
+        "Aucune odeur inhabituelle ni nappe huileuse visible n’est présente."
+      ],
+      data: {
+        "pH": "Normal",
+        "Oxygène dissous": "Normal",
+        "Conductivité": "Normal",
+        "Comptage des déchets": "Forte augmentation en 24 heures"
+      },
+      flavor: "Une belle performance de la culture du jetable.",
+      extraClue: "80 % des déchets visibles sont des emballages alimentaires ou de boissons à usage unique.",
+      questions: [
+        {
+          text: "Quel est le problème principal ?",
+          points: 2,
+          options: [
+            "Érosion de la plage causée par une tempête précédente",
+            "Contamination chronique par les métaux lourds",
+            "Ennui côtier",
+            "Accumulation aiguë de déchets plastiques et voies de drainage bloquées"
+          ],
+          correct: 3
+        },
+        {
+          text: "Quelle preuve est la plus utile pour le moment ?",
+          points: 2,
+          options: [
+            "Phase lunaire",
+            "Cartographie des déchets près des avaloirs et des points d’accumulation du littoral",
+            "Un comptage général des oiseaux marins dans la zone",
+            "Humidité intérieure de la salle de classe"
+          ],
+          correct: 1
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Organiser un nettoyage ciblé sur les sources aux sorties de drainage et aux points chauds du littoral, tout en documentant les types de déchets",
+            "Attendre de voir si la marée résout le problème",
+            "Programmer une cérémonie régionale de baptême de l’anse",
+            "Peindre les poubelles d’une autre couleur et s’arrêter là"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quel partenaire est le plus utile en premier ?",
+          points: 1,
+          options: [
+            "Un oiseau marin motivant",
+            "Personne",
+            "Les services municipaux des déchets et l’équipe de nettoyage école/communauté",
+            "Un ministère fictif"
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "L’incident est clairement une pression liée aux déchets, et non une crise chimique de qualité de l’eau. Un nettoyage rapide ciblé sur la source et une documentation sont la bonne première réponse.",
+      perfectLine: "Efficace, précis, et seulement légèrement déçu par l’humanité."
+    },
+
+    // ====================================================================
+    // ROUND 4 — MEDIUM-HARD. Multiple plausible distractors, must reason carefully.
+    // Correct positions: 0, 2, 3, 1
+    // ====================================================================
+    {
+      type: "Message à la communauté",
+      title: "Ça a l’air correct. Ça ne l’est pas.",
+      location: "Zone de baignade en rivière en aval d’une zone urbaine",
+      conditions: "Pluie intense suivie d’un avis de débordement du service gestionnaire",
+      observations: [
+        "L’eau paraît normale à l’œil nu.",
+        "La zone publique est encore utilisée.",
+        "Un avis de débordement a été émis il y a 8 heures."
+      ],
+      data: {
+        "Résultat E. coli": "En attente",
+        "Turbidité": "Légèrement élevé",
+        "pH": "Normal",
+        "Oxygène dissous": "Normal"
+      },
+      flavor: "La clarté visuelle continue de surestimer son expertise.",
+      extraClue: "L’événement de débordement a été confirmé par le service gestionnaire.",
+      questions: [
+        {
+          text: "Quel est le problème principal le plus probable ?",
+          points: 2,
+          options: [
+            "Possible contamination microbienne après débordement d’égout",
+            "Épisode uniquement sédimentaire dû à la pluie",
+            "Rejet de métaux lourds provenant du ruissellement urbain",
+            "Un trouble régional de l’humeur, surtout chez les poissons"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quelle preuve est la plus décisive maintenant ?",
+          points: 2,
+          options: [
+            "La couleur de l’eau seule",
+            "Une vérification d’ambiance par le héron local",
+            "Avis de débordement plus résultats bactériens en attente",
+            "Température de l’air sur la berge"
+          ],
+          correct: 2
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Déclarer l’eau sûre parce qu’elle paraît claire",
+            "Attendre que la turbidité visible se dépose, puis rouvrir sans test",
+            "Demander poliment aux bactéries de se révéler",
+            "Émettre un avis temporaire d’éviter tout contact et donner la priorité aux tests microbiens"
+          ],
+          correct: 3
+        },
+        {
+          text: "Quel est le message public le plus responsable ?",
+          points: 1,
+          options: [
+            "La rivière est dangereuse pour une durée indéterminée.",
+            "Un débordement récent peut affecter la sécurité de l’eau. Évitez le contact jusqu’à confirmation par les tests.",
+            "La rivière paraît correcte, donc l’usage normal doit continuer.",
+            "La communication est surestimée ; faites confiance à l’instinct des nageurs."
+          ],
+          correct: 1
+        }
+      ],
+      explanation: "Dans les situations de débordement, l’apparence ne suffit pas. Le risque microbien exige une communication proportionnée et des tests de laboratoire, pas un optimisme visuel ni le silence.",
+      perfectLine: "Excellent refus de confondre clair et sûr."
+    },
+
+    // ====================================================================
+    // ROUND 5 — HARD. Cross-border. Several distractors are partially-true
+    // (a real piece of the picture, but not the strongest interpretation).
+    // Correct positions: 2, 0, 3, 1
+    // ====================================================================
+    {
+      type: "Lien transfrontalier",
+      title: "Amont, aval",
+      location: "Système rivière-estuaire relié entre régions partenaires",
+      conditions: "Les équipes reçoivent des preuves différentes provenant de lieux connectés",
+      observations: [
+        "Aucune équipe ne voit l’ensemble du tableau.",
+        "L’usage des terres en amont et les symptômes en aval peuvent être liés.",
+        "Une interprétation partagée est possible sans devinette collective."
+      ],
+      data: {
+        "Équipe A": "Canal agricole en amont",
+        "Équipe B": "Bord de l’estuaire en aval",
+        "Équipe C": "Jonction de drainage près de l’apport d’un affluent"
+      },
+      teamSpecific: {
+        0: {
+          label: "Preuves de l’équipe A",
+          lines: [
+            "Une application récente d’engrais a été signalée à proximité.",
+            "Du sol nu est visible en bordure de champs après la pluie.",
+            "Nitrates : élevés.",
+            "Turbidité : modérée."
+          ]
+        },
+        1: {
+          label: "Preuves de l’équipe B",
+          lines: [
+            "Les taches vertes augmentent dans les eaux abritées.",
+            "Des poissons ont été observés près de la surface à l’aube.",
+            "Oxygène dissous : faible tôt le matin.",
+            "Phosphates : modérés."
+          ]
+        },
+        2: {
+          label: "Preuves de l’équipe C",
+          lines: [
+            "Le ruissellement était rapide après la pluie.",
+            "L’eau arrive par un fossé de drainage.",
+            "Nitrates : élevés.",
+            "Débit : temporairement élevé."
+          ]
+        }
+      },
+      flavor: "Les systèmes aquatiques restent connectés, malgré des tentatives répétées de l’ignorer.",
+      extraClue: "Le ruissellement a atteint un pic dans les 12 heures suivant l’application d’engrais.",
+      questions: [
+        {
+          text: "Quelle est la meilleure interprétation globale ?",
+          points: 2,
+          options: [
+            "Deux problèmes sans lien se produisant en même temps dans différentes régions",
+            "Un problème d’oxygène limité à l’estuaire et causé par la chaleur",
+            "Le ruissellement de nutriments en amont contribue au risque d’eutrophisation en aval",
+            "Une protestation interrégionale des poissons"
+          ],
+          correct: 2
+        },
+        {
+          text: "Quelle preuve liée compte le plus ?",
+          points: 2,
+          options: [
+            "Hausse des nutriments en amont combinée au stress d’oxygène et aux signes de prolifération en aval",
+            "La turbidité sédimentaire seule à la jonction de drainage, puisque le ruissellement est le déclencheur",
+            "Les symptômes de l’estuaire seuls, puisque c’est là que les dommages visibles apparaissent",
+            "Analyse du sentiment du chant des oiseaux entre bassins versants"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Traiter chaque site comme indépendant et communiquer séparément",
+            "Émettre des avertissements en aval pendant que l’enquête en amont se termine beaucoup plus tard",
+            "Publier une lettre ouverte sévère au bassin versant",
+            "Coordonner le suivi amont-aval et informer les autorités locales compétentes dans les deux lieux"
+          ],
+          correct: 3
+        },
+        {
+          text: "Quelle est l’étape de collaboration la plus responsable ?",
+          points: 1,
+          options: [
+            "L’équipe qui a le dossier le plus solide publie d’abord ; les autres s’alignent ensuite",
+            "Partager les résultats liés entre équipes avant de finaliser les conclusions publiques",
+            "Chaque équipe publie des conclusions indépendantes pour maintenir l’autonomie régionale",
+            "Convoquer un sommet d’urgence des canards voisins"
+          ],
+          correct: 1
+        }
+      ],
+      explanation: "L’explication la plus solide est une voie de nutriments liée : pression de ruissellement en amont, transport par le drainage, stress d’eutrophisation en aval. Chaque symptôme individuel est réel, mais seule la vision reliée prescrit une action utile.",
+      perfectLine: "Vous avez remarqué le système, pas seulement les symptômes. Excellent."
+    },
+
+    // ====================================================================
+    // ROUND 6 — HARD. Two genuinely competing interpretations.
+    // Correct positions: 1, 3, 0, 2
+    // ====================================================================
+    {
+      type: "Fenêtre d’action publique",
+      title: "L’école comme bassin versant",
+      location: "Campus scolaire et zone pavée adjacente",
+      conditions: "Signalements répétés de pertes d’eau inutiles et d’inondations au bord des avaloirs",
+      observations: [
+        "Un robinet extérieur fuit en continu.",
+        "La plupart des eaux de pluie de la cour s’écoulent directement vers les avaloirs.",
+        "Il y a très peu de sol perméable sur le campus."
+      ],
+      data: {
+        "Consommation d’eau de l’école ce mois-ci": "Anormalement élevée",
+        "Audit des fuites": "Pertes non résolues confirmées",
+        "Systèmes de récupération des eaux de pluie": "Absents",
+        "Ruissellement de surface après les orages": "Élevé"
+      },
+      flavor: "Le campus participe au cycle de l’eau de façon assez agressive.",
+      extraClue: "La perte due à la fuite est assez mesurable pour affecter les totaux mensuels de consommation d’eau.",
+      questions: [
+        {
+          text: "Quel est le problème principal ?",
+          points: 2,
+          options: [
+            "Un seul robinet cassé qui explique toute la hausse mensuelle de consommation d’eau",
+            "Échec combiné de gestion du campus : fuites, absence de récupération et surfaces imperméables",
+            "Consommation excessive d’eau potable par les élèves",
+            "La participation enthousiaste et continue du campus au cycle de l’eau"
+          ],
+          correct: 1
+        },
+        {
+          text: "Quelle preuve est la plus utile pour le moment ?",
+          points: 2,
+          options: [
+            "Le total annuel des précipitations de l’an dernier",
+            "L’historique des demandes de maintenance pour le seul robinet qui fuit",
+            "Un entretien officiel avec la pelouse",
+            "Budget de l’eau de l’école combiné aux données d’audit des fuites et aux observations du ruissellement après orage"
+          ],
+          correct: 3
+        },
+        {
+          text: "Quelle est la meilleure première action ?",
+          points: 3,
+          options: [
+            "Réparer les fuites ET concevoir en parallèle un plan pilote de récupération de pluie / amélioration des surfaces perméables",
+            "Réparer le robinet qui fuit et considérer l’affaire comme résolue",
+            "Lancer une campagne de sensibilisation dans toute l’école avant tout changement d’infrastructure",
+            "Organiser une veillée pour la pelouse"
+          ],
+          correct: 0
+        },
+        {
+          text: "Quelle étape d’action publique est la plus appropriée ?",
+          points: 1,
+          options: [
+            "Publier en ligne une critique anonyme de la direction de l’école",
+            "Attendre le prochain cycle budgétaire avant de soulever le problème",
+            "Présenter les preuves à la direction de l’école et à la gestion des bâtiments avec un plan d’action mesurable",
+            "Mettre en scène une lecture dramatique de la facture d’eau à la bougie"
+          ],
+          correct: 2
+        }
+      ],
+      explanation: "C’est un problème de gestion à plusieurs niveaux : la fuite, l’absence de récupération et la surface imperméable expliquent ensemble les données. Une correction d’une seule cause laisserait le système largement défaillant. La bonne démarche est un travail d’infrastructure en parallèle avec un plan documenté.",
+      perfectLine: "Pratique, mesurable, et agréablement dépourvu de symbolisme vide."
+    }
+  ];
+
+  // ============================================================
+  // REASONING HINTS — one per question. Free, optional.
+  // The pedagogical contract:
+  //   - Never name the correct option's wording.
+  //   - Never name the diagnostic term that is the answer.
+  //   - Point attention to evidence already on screen.
+  //   - Suggest elimination logic where useful.
+  //   - Pose the question the team should ask itself.
+  //   - Stay dry, short, age-appropriate.
+  // Hint TEXT may contain <strong>/<em> HTML — authored content only.
+  // ============================================================
+  const ROUNDS_HINTS = [
+    // Round 1 — Après la pluie (EASY)
+    [
+      "La forte pluie est venue d’abord. Puis trois choses ont changé en même temps : eau plus trouble, déchets près des avaloirs, débit plus rapide. Quel processus physique produit ces trois effets quand l’eau rencontre des surfaces pavées ? Les rivières n’ont pas d’opinion. La salinité et l’oxygène ne sont pas dans les données.",
+      "Une preuve utile doit être à la fois <strong>mesurable</strong> et <strong>directement liée à la question</strong>. Le total des précipitations est une vraie donnée, mais il indique ce qui est tombé du ciel — pas ce qui est entré dans le ruisseau. Cherchez l’option qui montre à la fois <em>ce qui</em> a changé et <em>où</em>.",
+      "Une enquête commence toujours par localiser la source <em>avant</em> de faire des déclarations de sécurité ou de reporter les décisions. Les lettres adressées à la météo sont charmantes mais inefficaces. Trois options sautent entièrement l’étape de recherche de la source.",
+      "Choisissez le public qui a à la fois l’autorité pour agir et un intérêt direct dans ce ruisseau. Agences de tourisme, clubs de théâtre et discussions de groupe sont de la décoration."
+    ],
+    // Round 2 — Surface verte, faible oxygène (EASY)
+    [
+      "La chaleur et le faible oxygène du matin sont réels, mais ils ne peignent pas seuls un film vert sur l’eau. Il y a une valeur de phosphate dans les données — quel diagnostic <em>exige</em> cet ingrédient ? Les poissons, bien qu’expressifs, ne s’organisent pas.",
+      "Associez les symptômes visibles à la chimie. Deux valeurs des données parlent pour tout le monde. Les menus du déjeuner et le vent du mois dernier ne le font pas.",
+      "On ne corrige pas une prolifération en ajoutant du savon, en retirant des plantes ou en négociant avec les algues. Pensez <em>contrôle à la source</em> : où le nutriment entre-t-il dans le système, et quelle action <em>réduit</em> cet apport ?",
+      "Une bonne communication signale la <em>possibilité</em>, recommande la <em>prudence</em> et attend les résultats de laboratoire. Deux options mentent clairement — dans des directions opposées. Une autre est simplement impolie envers les poissons."
+    ],
+    // Round 3 — Dérive du festival (MEDIUM)
+    [
+      "Regardez le tableau des données : pH, oxygène, conductivité — tout est normal. Un seul paramètre a augmenté fortement en 24 h. L’érosion due à une tempête apparaîtrait sous forme de turbidité et de sédiments. Les métaux lourds ou l’eutrophisation apparaîtraient dans la chimie. Les données pointent ailleurs.",
+      "Preuve utile ici = <strong>où</strong> se trouvent les déchets, <strong>quel type</strong> de déchets, et <strong>où</strong> ils s’accumulent. La phase lunaire, l’humidité intérieure et les comptages d’oiseaux marins ne vous aideront pas à placer une seule poubelle.",
+      "Les marées redistribuent les déchets flottants — elles ne les retirent pas. Une réponse qui enregistre ce qu’elle retire est deux fois plus utile qu’une réponse qui ne le fait pas. Cherchez l’option qui combine <em>action</em> et <em>données</em>.",
+      "Choisissez le partenaire qui a à la fois les bennes et l’autorité pour agir. Les oiseaux marins motivants et les ministères fictifs ne collectent pas les déchets."
+    ],
+    // Round 4 — Ça a l’air correct. Ça ne l’est pas. (MEDIUM)
+    [
+      "Un avis de débordement + un test bactérien en attente + une zone de baignade encore utilisée. Trois mauvaises options invoquent chacune un diagnostic différent (sédiments seuls, métaux lourds, humeur des poissons). Quel type de contamination un <em>événement de débordement</em> apporte-t-il précisément ? <em>Indice :</em> pas visible à l’œil nu.",
+      "Faites confiance au laboratoire et au service gestionnaire, pas à vos yeux. « Ça paraît clair » a trompé des générations de nageurs — et l’une des mauvaises options revient essentiellement à cela. La preuve décisive combine ici une <em>source</em> confirmée avec un <em>test</em> en attente.",
+      "Quand le résultat du test n’est pas encore arrivé mais que la source du risque est confirmée, quel est le coût d’attendre en silence par rapport au coût de recommander la prudence ? Demander aux bactéries de se révéler risque de ne pas fonctionner ; attendre que les sédiments se déposent ignore que les bactéries ne se comportent pas comme du limon.",
+      "Communiquez le <strong>risque</strong> et le <strong>plan</strong> : limité dans le temps, proportionné, honnête. Pas « définitivement toxique pour toujours », pas « ça a l’air correct », pas « nous n’avons pas de certitude donc nous ne disons rien »."
+    ],
+    // Round 5 — Amont, aval (HARD — cross-border)
+    [
+      "Trois options correspondent chacune à <em>une partie</em> du tableau : « deux problèmes séparés » convient si l’on regarde seulement à quel point les symptômes diffèrent ; « estuaire thermique » convient si l’on regarde seulement chaleur + faible O₂. Une seule option relie les trois parties dans une chaîne de cause à effet. (Les protestations des poissons, même énergiques, ne figurent pas dans les données.)",
+      "La preuve utile ici est la <strong>chaîne</strong>, pas un fait isolé. Le sédiment seul vous parle du transport, mais pas de la source de l’engrais. Les symptômes de l’estuaire seuls indiquent où les dommages apparaissent, mais pas ce qui les a causés. La présence scolaire n’a aucun rapport.",
+      "Un problème relié mérite une réponse reliée. Une option traite les sites comme indépendants ; une autre retarde l’enquête en amont ; une autre est une lettre sévère à un bassin versant. Quelle option reconnaît que les deux régions partagent un même système fluvial et agissent <em>ensemble</em> ?",
+      "La collaboration internationale est un processus, pas un podium. L’ordre compte : les partenaires partagent-ils les données <em>au début de l’analyse</em>, seulement après la publication des résultats d’une équipe, ou jamais ? « Le dossier le plus solide publie d’abord » semble efficace, mais affaiblit l’interprétation reliée."
+    ],
+    // Round 6 — L’école comme bassin versant (HARD)
+    [
+      "Regardez ce que les données décrivent réellement : une fuite, une cour pavée, une facture d’eau élevée, l’absence de récupération de pluie, un fort ruissellement. La fuite est réelle, mais UNE seule fuite ne peut pas expliquer le ruissellement et l’absence de récupération. La consommation d’eau potable n’est pas dans les données. La blague du cycle de l’eau est, eh bien, une blague. Quelle réponse unique tient compte de <em>toutes</em> les preuves ?",
+      "Les preuves les plus solides ici se trouvent dans des <strong>tableurs</strong> — il faut combiner au moins trois sources numériques pour saisir le tableau. Les précipitations annuelles sont trop grossières. L’historique du seul robinet parle d’une cause sur trois. Les conversations avec la pelouse produisent rarement des données utiles.",
+      "Slogans, affiches, veillées et corrections limitées à une seule chose ne changent pas le profil hydrique d’un campus. Cherchez l’option qui <em>modifie la situation physique</em> à plus d’un endroit à la fois — réparer quelque chose, concevoir quelque chose, documenter quelque chose — en parallèle.",
+      "Une vraie action publique passe par des personnes ayant autorité, soutenue par des chiffres et un plan concret. La critique anonyme évite les personnes qui peuvent autoriser le changement. Attendre le prochain budget évite l’urgence. Aller dans un journal national contourne toutes les personnes dont vous avez réellement besoin."
+    ]
+  ];
+
+  const HUMOR = {
+    waiting: [
+      "Équipes séparées. Conséquences partagées.",
+      "C’est la partie calme du bassin versant.",
+      "L’eau n’a pas perdu intérêt.",
+      "La confidentialité est la forme la plus polie de stratégie.",
+      "La rivière continue, imperturbable, vers l’aval."
+    ],
+    reveal: [
+      "Les preuves restent attachées à la précision.",
+      "Un cas classique de rencontre entre cause et conséquence.",
+      "La situation est mesurable, ce qui est rarement idéal.",
+      "Ce qui suit n’est pas une opinion.",
+      "Les données ne se soucient pas de la théorie qu’elles confirment."
+    ],
+    results: [
+      "L’eau était plus claire que certains raisonnements.",
+      "Une théorie ambitieuse. Les données en ont préféré une autre.",
+      "La confiance sans preuve reste décorative.",
+      "Certaines preuves ont été lues avec soin. D’autres ont été vaguement devinées."
+    ],
+    hintAck: [
+      "Un petit coup de pouce, offert par la maison.",
+      "Lire la rivière, c’est résoudre la moitié du problème.",
+      "Indice déployé. Les données font toujours le travail.",
+      "Un coup de pouce. La conclusion reste la vôtre.",
+      "Orientation : appliquée. Décision : en attente."
+    ],
+    // Reaction beats — chosen by score-out-of-8.
+    // Cosmetic only; never displayed before scoring; never affects scoring.
+    reactionPerfect: [
+      "Les données ont hoché la tête avec approbation.",
+      "Diagnostic : net. Manières au chevet : optionnelles.",
+      "Quatre sur quatre. La rivière n’a rien à ajouter.",
+      "Indiscernable du corrigé.",
+      "Si la rivière avait un tampon d’approbation, il serait mouillé."
+    ],
+    reactionStrong: [   // 6–7 / 8
+      "La plus grande partie du raisonnement tenait la route.",
+      "Lecture solide. Une note de bas de page.",
+      "Presque tout le tableau. Presque.",
+      "Assez proche pour que la rivière reste intéressée."
+    ],
+    reactionMixed: [    // 3–5 / 8
+      "Un milieu respectable. Les données sont patientes.",
+      "Un peu de signal, un peu de bruit.",
+      "Le genre de résultat qu’une relecture attentive corrige.",
+      "À moitié correct reste à moitié quelque chose."
+    ],
+    reactionRough: [    // 1–2 / 8
+      "La rivière a noté votre contribution.",
+      "Théorie : audacieuse. Données : peu convaincues.",
+      "Une interprétation intéressante, défendue avec énergie.",
+      "C’est de celle-ci qu’on apprend le plus. Paraît-il."
+    ],
+    reactionZero: [     // 0 / 8
+      "La rivière a noté votre contribution et a continué son chemin.",
+      "Un pur point de donnée : zéro sur huit.",
+      "Stratégie audacieuse. Violemment fausse.",
+      "Même les mauvaises réponses étaient impressionnées."
+    ],
+    // Group-level lines for special results
+    groupAllPerfect: [
+      "Soit les données étaient généreuses, soit les équipes étaient extraordinaires.",
+      "Trois manches parfaites. Statistiquement impoli."
+    ],
+    groupAllZero: [
+      "Conviction collective, erreur collective.",
+      "Le corrigé se sent seul ce soir."
+    ],
+    groupTie: [
+      "Égalité. La rivière est neutre ; le tableau des scores aussi.",
+      "Indiscernable. Statistiquement et moralement."
+    ]
+  };
+
+  // Achievement medals — earned at game end, cosmetic only.
+  // Each medal has: id, label, icon, dryline (the flavor reveal text), test(team, allRounds, state)
+  const MEDALS = [
+    {
+      id: 'self_taught',
+      label: 'Autodidacte',
+      icon: '💡',
+      dryline: 'A gagné sans utiliser le moindre indice.',
+      test: (team) => team.totalHintsUsed === 0
+    },
+    {
+      id: 'otter',
+      label: 'La loutre',
+      icon: '🦦',
+      dryline: 'A terminé sans dépenser de jeton de vérification.',
+      test: (team) => team.tokensEverUsed === 0
+    },
+    {
+      id: 'lab',
+      label: 'Le laboratoire',
+      icon: '🔬',
+      dryline: 'Parfait à chaque question de diagnostic.',
+      test: (team) => team.correctDiagnosis === 6
+    },
+    {
+      id: 'sensor',
+      label: 'Le capteur',
+      icon: '📡',
+      dryline: 'Parfait à chaque question sur les preuves.',
+      test: (team) => team.correctEvidence === 6
+    },
+    {
+      id: 'citizen',
+      label: 'Le citoyen',
+      icon: '🏛',
+      dryline: 'Parfait à chaque question civique.',
+      test: (team) => team.correctCivic === 6
+    },
+    {
+      id: 'watershed',
+      label: 'Le bassin versant',
+      icon: '🌊',
+      dryline: 'A réussi parfaitement la manche transfrontalière.',
+      test: (team, state) => {
+        // Round index 4 is "Lien transfrontalier"
+        const sub = state.allRoundResults && state.allRoundResults[4] && state.allRoundResults[4][team.id];
+        return sub && sub.gain === 8;
+      }
+    },
+    {
+      id: 'speedrun',
+      label: 'Course éclair',
+      icon: '⚡',
+      dryline: 'A verrouillé les réponses vite et souvent. La rivière n’a pas été consultée.',
+      test: (team) => team.fastLocks >= 3
+    },
+    {
+      id: 'streakmaster',
+      label: 'Maître des séries',
+      icon: '🔥',
+      dryline: 'A maintenu une série de trois manches parfaites d’affilée.',
+      test: (team) => team.bestStreak >= 3
+    }
+  ];
+
+  function pickReaction(gain){
+    if (gain === 8) return rand(HUMOR.reactionPerfect);
+    if (gain >= 6)  return rand(HUMOR.reactionStrong);
+    if (gain >= 3)  return rand(HUMOR.reactionMixed);
+    if (gain >= 1)  return rand(HUMOR.reactionRough);
+    return rand(HUMOR.reactionZero);
+  }
+
+  const state = {
+    screen: 'home',
+    teamCount: 2,
+    roundIndex: 0,
+    teams: [],
+    submissions: {},
+    currentModalTeam: null,
+    timer: null,
+    timeLeft: 35,
+    audioEnabled: true,
+    ambientId: null,
+    audioCtx: null,
+    soundUnlocked: false
+  };
+
+  const el = {
+    screen: document.getElementById('screen'),
+    modalRetourdrop: document.getElementById('modalRetourdrop'),
+    modal: document.getElementById('modal'),
+    footerFlavor: document.getElementById('footerFlavor'),
+    audioToggle: document.getElementById('audioToggle'),
+    resetBtn: document.getElementById('resetBtn'),
+    howToBtn: document.getElementById('howToBtn')
+  };
+
+  function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+  function setFooter(text){ el.footerFlavor.textContent = text; }
+
+  function unlockAudio(){
+    if(state.soundUnlocked) return;
+    try{
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      state.soundUnlocked = true;
+    }catch(e){}
+  }
+
+  function tone(freq=440, dur=0.12, type='sine', gain=0.02, when=0){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const t0 = ctx.currentTime + when;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function noiseBurst(dur=0.2, gain=0.01){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){ data[i] = (Math.random()*2-1) * (1 - i/data.length); }
+    const src = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    const g = ctx.createGain();
+    g.gain.value = gain;
+    src.buffer = buffer;
+    src.connect(filter).connect(g).connect(ctx.destination);
+    src.start();
+  }
+
+  // Sliding pitch tone — perfect for sad-trombone effects
+  function slideTon(startFreq, endFreq, dur=0.6, type='sawtooth', gain=0.025, when=0){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    const ctx = state.audioCtx;
+    const t0 = ctx.currentTime + when;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(startFreq, t0);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(40, endFreq), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function playClick(){ tone(550, 0.08, 'triangle', 0.016); }
+  function playRoll(){
+    noiseBurst(0.22, 0.011);
+    tone(170, 0.22, 'sine', 0.02);
+    tone(240, 0.20, 'triangle', 0.014, 0.03);
+  }
+  function playCorrect(){
+    // Brighter major-arpeggio sweep
+    tone(523, 0.14, 'sine', 0.020);          // C5
+    tone(659, 0.16, 'sine', 0.022, 0.06);    // E5
+    tone(784, 0.18, 'triangle', 0.018, 0.12);// G5
+    tone(1047, 0.22, 'sine', 0.014, 0.18);   // C6
+  }
+  // Perfect-round fanfare — short, victorious, dry-witty in vibe
+  function playPerfectFanfare(){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    // Mini fanfare: rising fifth → octave → high sparkle
+    tone(440, 0.10, 'triangle', 0.020, 0.00);  // A
+    tone(660, 0.10, 'triangle', 0.020, 0.10);  // E (5th up)
+    tone(880, 0.16, 'triangle', 0.022, 0.20);  // A (octave)
+    tone(1320, 0.22, 'sine', 0.018, 0.32);     // E (12th)
+    tone(1760, 0.28, 'sine', 0.014, 0.42);     // sparkle high A
+    // Soft thump underneath
+    tone(110, 0.30, 'sine', 0.015, 0.00);
+  }
+  function playWrong(){
+    tone(250, 0.20, 'sawtooth', 0.012);
+    tone(180, 0.28, 'triangle', 0.010, 0.03);
+  }
+  function playTransition(){
+    tone(310, 0.12, 'sine', 0.014);
+    tone(420, 0.20, 'triangle', 0.010, 0.06);
+  }
+  // Tick-tock: alternates high/low like a clock; gain scales with urgency.
+  // Called every second when timer ≤ 15. Below 5, the urgent version is used.
+  function playTick(urgent=false){
+    if (urgent){
+      // Sharper, louder, with a little dissonance
+      tone(1100, 0.04, 'square', 0.014);
+      tone(1650, 0.04, 'square', 0.008, 0.02);
+    } else {
+      // Soft wood-block style alternating beat
+      const isHi = (state.tickAlt = !state.tickAlt);
+      tone(isHi ? 880 : 740, 0.05, 'square', 0.008);
+    }
+  }
+  // Time-up: classic "wahh-wahh-wahh-waaaaaaaa" sad trombone slide.
+  // Three short descending blats followed by a longer terminal one.
+  function playTimeUp(){
+    if(!state.audioEnabled || !state.soundUnlocked || !state.audioCtx) return;
+    // Three little "wah" blats — descending notes
+    slideTon(440, 392, 0.18, 'sawtooth', 0.022, 0.00); // A4 → G4
+    slideTon(370, 330, 0.18, 'sawtooth', 0.022, 0.22); // F#4 → E4
+    slideTon(311, 277, 0.20, 'sawtooth', 0.022, 0.45); // D#4 → C#4
+    // Final long descending slump — the "waaaaaaa"
+    slideTon(277, 110, 0.85, 'sawtooth', 0.026, 0.70); // C#4 → A2
+    // Sympathetic harmonic touch on top
+    slideTon(554, 220, 0.85, 'triangle', 0.012, 0.70);
+  }
+  function ambientStart(){
+    if(!state.audioEnabled || !state.soundUnlocked || state.ambientId) return;
+    state.ambientId = setInterval(() => {
+      if(state.screen === 'final' || state.screen === 'home'){
+        tone(130, 1.5, 'sine', 0.002);
+        tone(196, 1.2, 'triangle', 0.0016, 0.18);
+      } else {
+        tone(110, 1.0, 'sine', 0.0017);
+        tone(165, 0.8, 'triangle', 0.0011, 0.12);
+      }
+    }, 3800);
+  }
+  function ambientStop(){
+    if(state.ambientId){ clearInterval(state.ambientId); state.ambientId = null; }
+  }
+
+  function resetGame(){
+    clearTimer();
+    state.screen = 'home';
+    state.teamCount = 2;
+    state.roundIndex = 0;
+    state.teams = [];
+    state.submissions = {};
+    state.currentModalTeam = null;
+    render();
+    setFooter("Le bassin versant continue de se souvenir de tout.");
+  }
+
+  function clearTimer(){
+    if(state.timer){ clearInterval(state.timer); state.timer = null; }
+  }
+
+  // Cosmetic team personas — chosen from a list, no scoring impact.
+  // Names are dry, observant, age-appropriate, slightly mythic.
+  const PERSONAS = [
+    { name: "Les sédiments",       icon: "🪨" },
+    { name: "Conseil riverain",    icon: "🌿" },
+    { name: "Hiboux de l’oxygène",         icon: "🦉" },
+    { name: "Gardiens du bassin versant",   icon: "🛡" },
+    { name: "Confluence",          icon: "💠" },
+    { name: "Société des affluents",   icon: "🌊" },
+    { name: "Les éphémères",        icon: "🪰" },
+    { name: "Guilde des sources",    icon: "⛰" },
+    { name: "Auditeurs du ruisseau",     icon: "📋" },
+    { name: "La bandelette pH",        icon: "🧪" },
+    { name: "Équipe de drainage",       icon: "🕳" },
+    { name: "Les loutres",          icon: "🦦" }
+  ];
+
+  function buildTeamInputs(count){
+    let html = '';
+    for(let i=0;i<count;i++){
+      const defaultPersona = PERSONAS[i % PERSONAS.length];
+      const optionsHtml = PERSONAS.map((p, idx) =>
+        `<option value="${escapeHtml(p.name)}" data-icon="${p.icon}" ${p === defaultPersona ? 'selected' : ''}>${p.icon} ${escapeHtml(p.name)}</option>`
+      ).join('') + `<option value="__custom__">✏️ Écrire notre propre nom…</option>`;
+      html += `
+      <div class="team-setup-row">
+        <label class="tiny" for="teamPersona${i}">Identité de l’équipe ${String.fromCharCode(65+i)}</label>
+        <select id="teamPersona${i}" class="persona-select" data-team="${i}">${optionsHtml}</select>
+        <input id="teamName${i}" value="${escapeHtml(defaultPersona.name)}" maxlength="22" class="hidden-when-preset">
+        <input id="teamIcon${i}" type="hidden" value="${defaultPersona.icon}">
+      </div>`;
+    }
+    return html;
+  }
+
+  function renderHome(){
+    el.screen.innerHTML = `
+      <div class="hero hero-with-art">
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Warm sunrise sky -->
+              <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"  stop-color="#ffa388" stop-opacity="0.55"/>
+                <stop offset="40%" stop-color="#ffcd6e" stop-opacity="0.40"/>
+                <stop offset="80%" stop-color="#5ddfff" stop-opacity="0.20"/>
+              </linearGradient>
+              <!-- River gradient — fresh aqua to mint -->
+              <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0.4">
+                <stop offset="0%"   stop-color="#5ddfff" stop-opacity="0.92"/>
+                <stop offset="55%"  stop-color="#cdb3ff" stop-opacity="0.78"/>
+                <stop offset="100%" stop-color="#6ff5b1" stop-opacity="0.65"/>
+              </linearGradient>
+              <!-- Sun glow -->
+              <radialGradient id="sunGlow">
+                <stop offset="0%" stop-color="#ffd97a" stop-opacity="0.95"/>
+                <stop offset="60%" stop-color="#ffa388" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#ff7acf" stop-opacity="0"/>
+              </radialGradient>
+              <!-- Kayak/raft silhouette gradient -->
+              <linearGradient id="raftGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ff7acf"/>
+                <stop offset="100%" stop-color="#ffa388"/>
+              </linearGradient>
+              <linearGradient id="raftGrad2" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5ddfff"/>
+                <stop offset="100%" stop-color="#6ff5b1"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Sky wash -->
+            <rect x="0" y="0" width="800" height="380" fill="url(#skyGrad)" opacity="0.75"/>
+
+            <!-- Sun -->
+            <g class="hero-sun">
+              <circle cx="640" cy="135" r="115" fill="url(#sunGlow)" opacity="0.85"/>
+              <circle cx="640" cy="135" r="42" fill="#ffd97a" opacity="0.95"/>
+              <circle cx="640" cy="135" r="32" fill="#fff4d6" opacity="0.85"/>
+            </g>
+
+            <!-- Distant mountain silhouettes — three layers, warm to cool -->
+            <path d="M 0 280 L 60 240 L 120 270 L 180 230 L 250 260 L 320 235 L 400 270 L 470 250 L 540 290 L 620 260 L 700 285 L 800 265 L 800 380 L 0 380 Z"
+                  fill="#cdb3ff" opacity="0.32"/>
+            <path d="M 0 320 L 80 290 L 160 315 L 240 280 L 330 310 L 410 295 L 490 320 L 570 300 L 660 325 L 740 305 L 800 318 L 800 400 L 0 400 Z"
+                  fill="#5ddfff" opacity="0.30"/>
+            <path d="M 0 350 L 100 335 L 200 350 L 290 330 L 380 350 L 470 340 L 560 355 L 650 340 L 740 358 L 800 348 L 800 420 L 0 420 Z"
+                  fill="#6ff5b1" opacity="0.28"/>
+
+            <!-- Rolling hills closer -->
+            <path d="M 0 415 Q 200 380 400 410 T 800 405 L 800 600 L 0 600 Z"
+                  fill="#1f4868" opacity="0.55"/>
+            <path d="M 0 460 Q 180 430 380 460 T 800 455 L 800 600 L 0 600 Z"
+                  fill="#163450" opacity="0.65"/>
+
+            <!-- Main river — wide, flowing curve with subtle ripples -->
+            <path
+              d="M -30 470
+                 C 100 460, 180 490, 280 480
+                 S 420 460, 500 470
+                 C 580 478, 640 500, 720 495
+                 L 830 500
+                 L 830 560
+                 C 720 560, 640 545, 540 555
+                 S 380 575, 280 565
+                 C 180 555, 80 580, -30 570 Z"
+              fill="url(#riverGrad)" opacity="0.72"/>
+
+            <!-- River ripple lines -->
+            <g stroke="#ffffff" stroke-width="1" fill="none" opacity="0.35">
+              <path d="M 80 500 Q 130 495 180 502" stroke-linecap="round"/>
+              <path d="M 240 515 Q 290 510 340 518" stroke-linecap="round"/>
+              <path d="M 420 525 Q 470 520 520 528" stroke-linecap="round"/>
+              <path d="M 580 510 Q 630 505 680 512" stroke-linecap="round"/>
+              <path d="M 130 540 Q 180 535 230 542" stroke-linecap="round"/>
+              <path d="M 380 545 Q 430 540 480 548" stroke-linecap="round"/>
+            </g>
+
+            <!-- Two stylized rafts on the river — geometric, refined, no faces -->
+            <g class="hero-raft1">
+              <ellipse cx="220" cy="510" rx="38" ry="9" fill="url(#raftGrad)" opacity="0.92"/>
+              <rect x="206" y="494" width="28" height="10" rx="2" fill="#ff7acf" opacity="0.9"/>
+              <!-- two paddler silhouettes — abstract heads/torsos -->
+              <circle cx="212" cy="488" r="5" fill="#ffd97a"/>
+              <circle cx="228" cy="488" r="5" fill="#ffa388"/>
+              <!-- Paddles -->
+              <line x1="200" y1="488" x2="195" y2="478" stroke="#ffd97a" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="240" y1="488" x2="245" y2="478" stroke="#ffa388" stroke-width="1.6" stroke-linecap="round"/>
+            </g>
+
+            <g class="hero-raft2">
+              <ellipse cx="540" cy="538" rx="32" ry="7" fill="url(#raftGrad2)" opacity="0.92"/>
+              <rect x="528" y="525" width="24" height="9" rx="2" fill="#5ddfff" opacity="0.9"/>
+              <circle cx="534" cy="520" r="4.5" fill="#6ff5b1"/>
+              <circle cx="548" cy="520" r="4.5" fill="#5ddfff"/>
+              <line x1="524" y1="520" x2="519" y2="510" stroke="#6ff5b1" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="558" y1="520" x2="563" y2="510" stroke="#5ddfff" stroke-width="1.6" stroke-linecap="round"/>
+            </g>
+
+            <!-- Birds (V-shapes, peaceful) -->
+            <g stroke="#1f4868" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.58">
+              <path d="M 240 175 q 6 -5 12 0 q 6 -5 12 0"/>
+              <path d="M 320 200 q 5 -4 10 0 q 5 -4 10 0"/>
+              <path d="M 410 165 q 6 -5 12 0 q 6 -5 12 0"/>
+            </g>
+
+            <!-- Floating data-points (sun-glints on water) -->
+            <g class="hero-particles">
+              <circle cx="120" cy="490" r="1.6" fill="#fff4d6" opacity="0.85"/>
+              <circle cx="350" cy="495" r="1.4" fill="#fff4d6" opacity="0.75"/>
+              <circle cx="460" cy="485" r="1.5" fill="#fff4d6" opacity="0.80"/>
+              <circle cx="610" cy="500" r="1.3" fill="#fff4d6" opacity="0.7"/>
+              <circle cx="690" cy="510" r="1.4" fill="#fff4d6" opacity="0.75"/>
+              <circle cx="170" cy="540" r="1.5" fill="#5ddfff" opacity="0.65"/>
+              <circle cx="380" cy="550" r="1.3" fill="#cdb3ff" opacity="0.6"/>
+              <circle cx="620" cy="555" r="1.5" fill="#6ff5b1" opacity="0.6"/>
+              <!-- Floating petals/leaves drifting -->
+              <ellipse cx="280" cy="460" rx="2.5" ry="1.2" fill="#ffa388" opacity="0.65" transform="rotate(20 280 460)"/>
+              <ellipse cx="500" cy="475" rx="2.5" ry="1.2" fill="#ff7acf" opacity="0.6" transform="rotate(-15 500 475)"/>
+              <ellipse cx="660" cy="470" rx="2.5" ry="1.2" fill="#ffd97a" opacity="0.7" transform="rotate(35 660 470)"/>
+              <ellipse cx="80" cy="468" rx="2.5" ry="1.2" fill="#cdb3ff" opacity="0.6" transform="rotate(-25 80 468)"/>
+            </g>
+
+            <!-- A few clouds — wispy, optional -->
+            <g fill="#fff" opacity="0.18">
+              <ellipse cx="180" cy="120" rx="60" ry="8"/>
+              <ellipse cx="450" cy="80" rx="50" ry="6"/>
+              <ellipse cx="100" cy="200" rx="40" ry="5"/>
+            </g>
+          </svg>
+        </div>
+        <section class="panel hero-panel">
+          <div class="kicker">Guardians of our Waters • Mission multijoueur</div>
+          <h2 class="display-title hero-title">Waters Under Pressure</h2>
+          <div class="hero-subtitle">Gardiens en direct</div>
+          <p class="lead">Un jeu de stratégie en équipe affiné pour adolescents. Lisez des preuves environnementales, interprétez des données réalistes sur l’eau et prenez les décisions les plus exactes sous pression. Pas de jugement subjectif. Pas de « meilleure performance gagne ». Juste de la science, de la stratégie et des conséquences.</p>
+          <div class="chips">
+            <span class="chip">2–3 équipes</span>
+            <span class="chip">6 manches</span>
+            <span class="chip">Score uniquement objectif</span>
+            <span class="chip">Prototype jouable en un seul fichier</span>
+          </div>
+          <div class="narration">
+            Bienvenue dans la mission.<br>
+            Dans différentes eaux, les signes changent. Votre tâche est simple en théorie et inconfortable en pratique :
+            lire les preuves, comprendre la pression et répondre correctement.
+            Le système aquatique ne récompense pas le bruit. Il récompense l’attention.
+          </div>
+          <div class="actions">
+            <button class="primary" id="startSetupBtn">Créer une mission</button>
+            <button id="openHowHome">Comment jouer</button>
+          </div>
+        </section>
+        <section class="panel soft stack hero-panel">
+          <div class="stat">
+            <div class="label">Meilleur mode de jeu</div>
+            <div class="value">Équipes sur écran partagé</div>
+            <div class="caption">Idéal pour une projection en classe, des séances animées en ligne ou un appareil passé entre les porte-parole des équipes.</div>
+          </div>
+          <div class="grid2">
+            <div class="stat">
+              <div class="label">Couche stratégique</div>
+              <div class="value">Jetons de vérification</div>
+              <div class="caption">Chaque équipe commence avec deux indices qu’elle peut débloquer aux moments critiques.</div>
+            </div>
+            <div class="stat">
+              <div class="label">Déroulement d’une manche</div>
+              <div class="value">Lancer → Lire → Décider → Résoudre</div>
+              <div class="caption">Rythme clair. Tension nette.</div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">Ton</h3>
+            <p class="helper">Finement mordant, jamais enfantin. L’humour se trouve dans la narration, pas dans le score.</p>
+            <div class="pill-row">
+              <span class="chip">« La rivière a soumis de nouvelles preuves. »</span>
+              <span class="chip">« La confiance sans preuve reste décorative. »</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    document.getElementById('startSetupBtn').onclick = () => { playClick(); renderSetup(); };
+    document.getElementById('openHowHome').onclick = () => { playClick(); renderHowTo(); };
+  }
+
+  function renderSetup(){
+    state.screen = 'setup';
+    el.screen.innerHTML = `
+      <div class="grid2">
+        <section class="panel">
+          <div class="kicker">Configuration de la mission</div>
+          <h2 style="margin-top:0">Créer une nouvelle partie</h2>
+          <div class="stack">
+            <div>
+              <label for="teamCount">Nombre d’équipes</label>
+              <select id="teamCount">
+                <option value="2" ${state.teamCount===2?'selected':''}>2 équipes</option>
+                <option value="3" ${state.teamCount===3?'selected':''}>3 équipes</option>
+              </select>
+            </div>
+            <div id="teamNameWrap" class="stack">${buildTeamInputs(state.teamCount)}</div>
+            <div>
+              <label for="roundCount">Manches</label>
+              <input id="roundCount" value="6" disabled>
+            </div>
+            <div class="actions">
+              <button class="primary" id="beginMissionBtn">Commencer la mission</button>
+              <button id="backHomeBtn">Retour</button>
+            </div>
+          </div>
+        </section>
+        <section class="panel soft">
+          <h3 style="margin-top:0">Comment fonctionne ce prototype</h3>
+          <div class="howto">
+            <ol>
+              <li>Choisissez 2 ou 3 équipes et donnez-leur un nom.</li>
+              <li>Chaque manche commence par un lancer de rivière qui détermine le type de défi.</li>
+              <li>Tout le groupe lit la même carte de preuves.</li>
+              <li>Chaque équipe répond en privé, à son tour, dans un panneau plein écran.</li>
+              <li>Chaque question propose un <strong>indice de raisonnement</strong> gratuit — un coup de pouce pour réfléchir, pas la réponse.</li>
+              <li>Vous pouvez aussi dépenser un <strong>jeton de vérification</strong> pour obtenir une preuve supplémentaire dans la manche.</li>
+              <li>Le jeu note automatiquement toutes les réponses et révèle les résultats.</li>
+            </ol>
+            <div class="narration">
+              Cette version est l’édition en un seul fichier la plus complète possible : campagne complète, effets sonores, jetons de stratégie, indices de raisonnement gratuits, séries et direction audiovisuelle soignée. Une vraie version en direct sur plusieurs appareils nécessiterait un service backend synchronisé.
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    document.getElementById('teamCount').onchange = (e) => {
+      state.teamCount = Number(e.target.value);
+      document.getElementById('teamNameWrap').innerHTML = buildTeamInputs(state.teamCount);
+      wirePersonaPickers();
+    };
+
+    function wirePersonaPickers(){
+      document.querySelectorAll('.persona-select').forEach(sel => {
+        const i = sel.dataset.team;
+        const nameInput = document.getElementById(`teamName${i}`);
+        const iconInput = document.getElementById(`teamIcon${i}`);
+        const sync = () => {
+          if (sel.value === '__custom__'){
+            nameInput.classList.remove('hidden-when-preset');
+            nameInput.value = '';
+            nameInput.placeholder = 'Nom de votre équipe…';
+            nameInput.focus();
+            iconInput.value = '🌐';
+          } else {
+            nameInput.classList.add('hidden-when-preset');
+            nameInput.value = sel.value;
+            const opt = sel.options[sel.selectedIndex];
+            iconInput.value = opt.dataset.icon || '🌊';
+          }
+        };
+        sel.addEventListener('change', () => { playClick(); sync(); });
+        // Initialize hidden-by-default state
+        if (sel.value !== '__custom__') nameInput.classList.add('hidden-when-preset');
+      });
+    }
+    wirePersonaPickers();
+
+    document.getElementById('backHomeBtn').onclick = () => { playClick(); resetGame(); };
+    document.getElementById('beginMissionBtn').onclick = () => {
+      playTransition();
+      unlockAudio();
+      ambientStart();
+      const teams = [];
+      for(let i=0;i<state.teamCount;i++){
+        const sel = document.getElementById(`teamPersona${i}`);
+        const customName = (document.getElementById(`teamName${i}`)?.value || '').trim();
+        const isCustom = sel && sel.value === '__custom__';
+        const name = isCustom ? (customName || `Équipe ${String.fromCharCode(65+i)}`) : (sel ? sel.value : `Équipe ${String.fromCharCode(65+i)}`);
+        const icon = (document.getElementById(`teamIcon${i}`)?.value) || '🌊';
+        teams.push({
+          id:i,
+          name: name,
+          icon: icon,
+          score:0,
+          tokens:2,
+          tokensEverUsed:0,
+          perfectRounds:0,
+          correctDiagnosis:0,
+          correctAction:0,
+          correctEvidence:0,
+          correctCivic:0,
+          streak:0,
+          bestStreak:0,
+          hintFreeRounds:0,
+          totalHintsUsed:0,
+          fastLocks:0,
+          medals:[]
+        });
+      }
+      state.teams = teams;
+      state.roundIndex = 0;
+      state.submissions = {};
+      renderOpening();
+    };
+  }
+
+  function renderHowTo(){
+    state.screen = 'howto';
+    el.screen.innerHTML = `
+      <div class="grid2">
+        <section class="panel">
+          <div class="kicker">Comment jouer</div>
+          <h2 style="margin-top:0">Règles de la mission</h2>
+          <div class="howto">
+            <ol>
+              <li>Chaque manche commence par un <strong>lancer de rivière</strong>. Il détermine le type de défi.</li>
+              <li>Une <strong>carte de preuves</strong> apparaît avec des observations et des données sur l’eau.</li>
+              <li>Chaque équipe répond à <strong>4 questions à choix multiple</strong>.</li>
+              <li>Chaque réponse est notée automatiquement. Le jeu ne demande jamais de jugement subjectif.</li>
+              <li>Chaque question propose un <strong>💡 indice de raisonnement</strong> gratuit — un coup de pouce pour réfléchir, pas la réponse. Son utilisation n’entraîne aucune pénalité de score.</li>
+              <li>Chaque équipe peut utiliser <strong>2 jetons de vérification</strong> pendant toute la mission pour révéler une preuve supplémentaire de la manche.</li>
+              <li>Réussissez des manches parfaites d’affilée pour créer une <strong>🔥 série</strong>. Les manches parfaites sans indice rapportent un badge <strong>SANS AIDE</strong>.</li>
+            </ol>
+          </div>
+          <div class="panel soft" style="margin-top:14px">
+            <h3 style="margin-top:0">Score</h3>
+            <table class="table">
+              <tr><th>Diagnostic correct</th><td>+2</td></tr>
+              <tr><th>Choix de preuve correct</th><td>+2</td></tr>
+              <tr><th>Première action correcte</th><td>+3</td></tr>
+              <tr><th>Choix correct de communication / collaboration / action publique</th><td>+1</td></tr>
+              <tr><th>Maximum par manche</th><td>8</td></tr>
+            </table>
+          </div>
+          <div class="actions">
+            <button class="primary" id="howStartBtn">${state.teams.length ? 'Retour à la partie' : 'Créer une mission'}</button>
+            <button id="howRetourBtn">Retour</button>
+          </div>
+        </section>
+        <section class="panel soft">
+          <h3 style="margin-top:0">Types de défis</h3>
+          <div class="stack">
+            ${Object.entries(TYPES).map(([name, t]) => `
+              <div class="stat">
+                <div class="label">${escapeHtml(name)}</div>
+                <div class="value" style="font-size:22px">${escapeHtml(t.icon)} ${escapeHtml(name)}</div>
+                <div class="caption">${escapeHtml(t.desc)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="flavor">Vous n’êtes pas là pour paraître impressionnants. Vous êtes là pour être corrects.</div>
+        </section>
+      </div>
+    `;
+    document.getElementById('howStartBtn').onclick = () => {
+      playClick();
+      if(state.teams.length){ renderCurrentFlow(); } else { renderSetup(); }
+    };
+    document.getElementById('howRetourBtn').onclick = () => {
+      playClick();
+      if(state.teams.length){ renderCurrentFlow(); } else { renderHome(); }
+    };
+  }
+
+  function renderOpening(){
+    state.screen = 'opening';
+    setFooter("Les données commencent à se faire des opinions.");
+    el.screen.innerHTML = `
+      <section class="panel center">
+        <div class="kicker">Briefing de mission</div>
+        <h2 class="display-title" style="font-size:44px">Mission prête</h2>
+        <div class="narration" style="max-width:820px; margin:0 auto 18px; text-align:left">
+          Dans différentes eaux, les signes changent.<br><br>
+          Votre tâche est simple en théorie et inconfortable en pratique :
+          lire les preuves, comprendre la pression et répondre correctement.<br><br>
+          Le système aquatique ne récompense pas le bruit. Il récompense l’attention.
+        </div>
+        <div class="score-strip">
+          ${state.teams.map(team => `
+            <div class="team-card">
+              <h4><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+              <div class="meta">
+                <span>Score des Gardiens : <strong>${team.score}</strong></span>
+                <span class="token">Jetons de vérification : ${team.tokens}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="actions" style="justify-content:center">
+          <button class="primary" id="startRoundOneBtn">Commencer la manche 1</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('startRoundOneBtn').onclick = () => {
+      playTransition();
+      renderRoundIntro();
+    };
+  }
+
+  function renderScoreStrip(){
+    return `
+      <div class="score-strip">
+        ${state.teams.map(team => `
+          <div class="team-card">
+            <h4><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+            <div class="meta">
+              <span>Score <strong>${team.score}</strong></span>
+              <span class="token">Vérification ${team.tokens}</span>
+              <span>Manches parfaites <strong>${team.perfectRounds}</strong></span>
+              ${team.streak >= 2 ? `<span class="streak-chip hot"><span class="flame">🔥</span>${team.streak}× série</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderRoundIntro(){
+    state.screen = 'roundIntro';
+    const round = ROUNDS[state.roundIndex];
+    state.submissions = {};
+    setFooter("Préparation de l’incident...");
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel center">
+        <div class="kicker">Manche ${state.roundIndex + 1} sur ${ROUNDS.length}</div>
+        <h2 class="display-title" style="font-size:42px">${escapeHtml(round.title)}</h2>
+        <div class="round-type">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+        <div class="narration" style="max-width:700px; margin:22px auto 12px">
+          Analyse des conditions actuelles...<br>
+          Vérification de la pression récente...<br>
+          Chargement des preuves...
+        </div>
+        <div class="actions" style="justify-content:center">
+          <button class="primary" id="toRollBtn">Lancer le lancer de rivière</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('toRollBtn').onclick = () => {
+      playRoll();
+      renderRoll();
+    };
+  }
+
+  function renderRoll(){
+    state.screen = 'roll';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(rand(HUMOR.reveal));
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel roll-stage">
+        <div class="kicker">Lancer de rivière</div>
+        <div class="die-wrap">
+          <div class="die rolling" id="die">${escapeHtml(TYPES[round.type].icon)}</div>
+        </div>
+        <div class="type-name" id="typeName">Détermination du type de défi...</div>
+        <div class="subtle" id="typeDesc">Lecture des conditions actuelles. La rivière vous a apporté un problème. Quelle délicate attention.</div>
+        <div class="actions center" style="justify-content:center">
+          <button class="primary hidden" id="revealEvidenceBtn">Révéler les preuves</button>
+        </div>
+      </section>
+    `;
+    const seq = ["Test de terrain","Alerte pollution","Réponse rapide","Message à la communauté","Lien transfrontalier","Fenêtre d’action publique"];
+    let idx = 0;
+    const typeName = document.getElementById('typeName');
+    const typeDesc = document.getElementById('typeDesc');
+    const die = document.getElementById('die');
+    const spinTimer = setInterval(() => {
+      const t = TYPES[seq[idx % seq.length]];
+      die.textContent = t.icon;
+      typeName.textContent = seq[idx % seq.length];
+      typeDesc.textContent = t.desc;
+      idx++;
+      playTick();
+    }, 180);
+
+    setTimeout(() => {
+      clearInterval(spinTimer);
+      die.classList.remove('rolling');
+      die.textContent = TYPES[round.type].icon;
+      typeName.textContent = round.type;
+      typeDesc.textContent = TYPES[round.type].desc;
+      document.getElementById('revealEvidenceBtn').classList.remove('hidden');
+      document.getElementById('revealEvidenceBtn').onclick = () => {
+        playTransition();
+        renderEvidence();
+      };
+    }, 1850);
+  }
+
+  function renderEvidence(){
+    state.screen = 'evidence';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(round.flavor);
+    const crossBorderNote = round.type === "Lien transfrontalier"
+      ? `<div class="clue-box">Cette manche utilise des preuves réparties. Chaque équipe verra un panneau supplémentaire propre à son équipe pendant son tour de réponse privé.</div>` : '';
+    // Reading-the-data tips: meta-skill cues that never spoil any specific round.
+    // One is shown per round, rotating by round index. They teach how to think with data.
+    const READING_TIPS = [
+      "<strong>Lire les données :</strong> comparez chaque valeur à sa référence. La <em>direction du changement</em> compte plus que le nombre absolu.",
+      "<strong>Lire les données :</strong> cherchez ce qui a changé et ce qui n’a pas changé. Les paramètres stables sont aussi des preuves — ils écartent des diagnostics.",
+      "<strong>Lire les données :</strong> une seule mesure anormale est un indice, pas un verdict. Cherchez deux ou trois signaux qui pointent dans la même direction.",
+      "<strong>Lire les données :</strong> le moment d’un changement indique souvent sa cause. Que s’est-il passé dans les heures précédant le changement des mesures ?",
+      "<strong>Lire les données :</strong> certaines mesures sont <em>manquantes</em> volontairement. Les tests en attente et l’absence de suivi sont des signaux — notez ce que vous ne pouvez pas encore voir.",
+      "<strong>Lire les données :</strong> l’action la moins coûteuse est rarement la mauvaise — enquêter, documenter, puis décider. Les réactions bruyantes sans preuves vieillissent mal."
+    ];
+    const tip = READING_TIPS[state.roundIndex % READING_TIPS.length];
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Carte de preuves</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="round-type">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+          </div>
+          <div class="panel soft" style="padding:14px; min-width:250px">
+            <div class="tiny">Lieu</div>
+            <div style="font-weight:700; margin-bottom:8px">${escapeHtml(round.location)}</div>
+            <div class="tiny">Conditions récentes</div>
+            <div>${escapeHtml(round.conditions)}</div>
+          </div>
+        </div>
+        ${crossBorderNote}
+        <div class="reading-tip">${tip}</div>
+        <div class="evidence-layout">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Observations de terrain</h3>
+            <ul class="list">
+              ${round.observations.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Données récentes</h3>
+            <div class="metric-grid">
+              ${Object.entries(round.data).map(([k,v]) => `
+                <div class="metric">
+                  <div class="m-label">${escapeHtml(k)}</div>
+                  <div class="m-value">${escapeHtml(v)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="flavor">${escapeHtml(round.flavor)}</div>
+        <div class="actions">
+          <button class="primary" id="openDecisionBtn">Ouvrir les décisions des équipes</button>
+          <button id="backToRollBtn">Retour</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('openDecisionBtn').onclick = () => { playClick(); renderDecisionHub(); };
+    document.getElementById('backToRollBtn').onclick = () => { playClick(); renderRoll(); };
+  }
+
+  function renderDecisionHub(){
+    state.screen = 'decision';
+    const round = ROUNDS[state.roundIndex];
+    setFooter(rand(HUMOR.waiting));
+    const allDone = state.teams.every(t => state.submissions[t.id]);
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Décisions des équipes</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="subtle">Chaque équipe répond en privé, à tour de rôle. Les réponses sont masquées après soumission.</div>
+          </div>
+          <div class="panel soft" style="padding:14px; max-width:340px">
+            <div class="tiny">Rappel</div>
+            <div>La confiance est bienvenue. La confiance sans preuve reste décorative.</div>
+          </div>
+        </div>
+        <div class="decision-grid">
+          ${state.teams.map(team => {
+            const sub = state.submissions[team.id];
+            return `
+            <div class="submit-card">
+              <div class="status-pill ${sub ? 'status-done' : 'status-pending'}">${sub ? 'Soumis' : 'En attente'}</div>
+              <h3 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h3>
+              <div class="helper">Jetons de vérification restants : <strong>${team.tokens}</strong></div>
+              ${sub ? `
+                <div class="panel soft" style="margin-top:12px; padding:12px">
+                  Réponses verrouillées. ${sub.usedClue ? 'Indice supplémentaire utilisé dans cette manche.' : 'Aucun indice supplémentaire utilisé.'}
+                </div>
+              ` : `
+                <div class="actions">
+                  <button class="primary openTeamBtn" data-team="${team.id}">Ouvrir le panneau privé</button>
+                </div>
+              `}
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="actions">
+          <button class="success" id="revealResultsBtn" ${allDone ? '' : 'disabled'}>Révéler les résultats</button>
+          <button id="backEvidenceBtn">Retour aux preuves</button>
+        </div>
+      </section>
+    `;
+    document.querySelectorAll('.openTeamBtn').forEach(btn => {
+      btn.onclick = () => {
+        playClick();
+        openTeamModal(Number(btn.dataset.team));
+      };
+    });
+    document.getElementById('revealResultsBtn').onclick = () => {
+      if(!allDone) return;
+      playTransition();
+      computeRound();
+      renderResolution();
+    };
+    document.getElementById('backEvidenceBtn').onclick = () => { playClick(); renderEvidence(); };
+  }
+
+  function teamSpecificPanel(round, teamId){
+    if(round.type !== "Lien transfrontalier") return '';
+    const info = round.teamSpecific[teamId] || round.teamSpecific[0];
+    return `
+      <div class="clue-box">
+        <strong>${escapeHtml(info.label)}</strong>
+        <ul class="list" style="margin-top:10px">
+          ${info.lines.map(line => `<li>${escapeHtml(line)}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  function openTeamModal(teamId){
+    clearTimer();
+    const round = ROUNDS[state.roundIndex];
+    const team = state.teams.find(t => t.id === teamId);
+    const N = round.questions.length;
+    const existing = state.submissions[teamId] || {
+      answers: Array(N).fill(null),
+      usedClue:false,
+      hintsUsed: Array(N).fill(false)
+    };
+    // Defensive: always size hintsUsed to match the round's question count
+    if(!Array.isArray(existing.hintsUsed) || existing.hintsUsed.length !== N){
+      const old = existing.hintsUsed || [];
+      existing.hintsUsed = Array(N).fill(false).map((_, i) => !!old[i]);
+    }
+    state.currentModalTeam = teamId;
+    state.timeLeft = 35;
+
+    const hintsForRound = ROUNDS_HINTS[state.roundIndex] || [];
+
+    el.modal.innerHTML = `
+      <div class="modal-header">
+        <div>
+          <div class="kicker">Panneau de réponse privé</div>
+          <h2 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h2>
+          <div class="subtle">${escapeHtml(round.title)} • ${escapeHtml(round.type)}</div>
+        </div>
+        <div class="timer">
+          <div class="tiny">Temps restant</div>
+          <div class="num" id="modalTimerNum">35</div>
+        </div>
+      </div>
+      ${teamSpecificPanel(round, teamId)}
+      <div id="extraClueArea"></div>
+      <div class="actions" style="margin-bottom:16px">
+        <button id="useClueBtn" class="warn" ${team.tokens < 1 || existing.usedClue ? 'disabled' : ''}>Utiliser un jeton de vérification (${team.tokens})</button>
+        <button id="closeModalBtn">Fermer</button>
+      </div>
+      <div class="stack">
+        ${round.questions.map((q, qi) => {
+          const hintText = hintsForRound[qi] || "";
+          const used = existing.hintsUsed[qi];
+          return `
+          <div class="question" data-q="${qi}">
+            <div class="q-title">${qi+1}. ${escapeHtml(q.text)} <span class="subtle">(+${q.points})</span></div>
+            ${hintText ? `
+              <button type="button" class="hint-btn ${used ? 'used' : ''}" data-hint="${qi}" ${used ? 'disabled' : ''}>
+                <span class="lamp">💡</span>
+                <span>${used ? 'Indice affiché' : 'Besoin d’un indice ?'}</span>
+              </button>
+              <div class="hint-reveal" id="hintReveal${qi}" style="${used ? '' : 'display:none'}">${hintText}</div>
+            ` : ''}
+            <div class="options">
+              ${q.options.map((opt, oi) => `
+                <label class="option ${existing.answers[qi]===oi ? 'selected' : ''}">
+                  <input type="radio" name="q${qi}" value="${oi}" ${existing.answers[qi]===oi ? 'checked' : ''}>
+                  <span class="mark">●</span>
+                  <span>${escapeHtml(opt)}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="actions">
+        <button class="primary" id="lockAnswersBtn">Verrouiller les réponses</button>
+      </div>
+      <div class="caption">Les indices sont gratuits et ne pénalisent jamais le score. Les réponses ne peuvent pas être modifiées après soumission.</div>
+    `;
+    el.modalRetourdrop.classList.add('show');
+
+    function renderExtraClue(){
+      const area = document.getElementById('extraClueArea');
+      if(existing.usedClue){
+        area.innerHTML = `<div class="clue-box"><strong>Indice de vérification débloqué :</strong> ${escapeHtml(round.extraClue)}</div>`;
+      } else {
+        area.innerHTML = '';
+      }
+    }
+    renderExtraClue();
+
+    document.querySelectorAll('.option input').forEach(input => {
+      input.addEventListener('change', () => {
+        playClick();
+        input.closest('.question').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        input.closest('.option').classList.add('selected');
+      });
+    });
+
+    // Hint button handlers — free, one per question, no penalty
+    document.querySelectorAll('.hint-btn').forEach(btn => {
+      btn.onclick = () => {
+        const qi = Number(btn.dataset.hint);
+        if(existing.hintsUsed[qi]) return;
+        existing.hintsUsed[qi] = true;
+        const reveal = document.getElementById(`hintReveal${qi}`);
+        if(reveal) reveal.style.display = 'block';
+        btn.classList.add('used');
+        btn.disabled = true;
+        btn.querySelector('span:last-child').textContent = 'Indice affiché';
+        // soft, friendly tone — not the success sound
+        tone(420, 0.10, 'sine', 0.014);
+        tone(560, 0.14, 'triangle', 0.012, 0.05);
+        setFooter(rand(HUMOR.hintAck));
+      };
+    });
+
+    document.getElementById('useClueBtn').onclick = () => {
+      if(team.tokens < 1 || existing.usedClue) return;
+      playTransition();
+      team.tokens -= 1;
+      existing.usedClue = true;
+      renderExtraClue();
+      document.getElementById('useClueBtn').disabled = true;
+      document.getElementById('useClueBtn').textContent = `Utiliser un jeton de vérification (${team.tokens})`;
+    };
+    document.getElementById('closeModalBtn').onclick = () => {
+      playClick();
+      saveDraftAnswers(teamId, existing);
+      closeModal();
+    };
+    document.getElementById('lockAnswersBtn').onclick = () => {
+      playClick();
+      const answers = collectModalAnswers(round.questions.length);
+      const fastLock = state.timeLeft >= 15 && answers.every(a => a !== null);
+      state.submissions[teamId] = { answers, usedClue: existing.usedClue, hintsUsed: existing.hintsUsed.slice(), fastLock };
+      closeModal();
+      renderDecisionHub();
+      if(state.teams.every(t => state.submissions[t.id])) {
+        setFooter("Toutes les équipes ont soumis leurs réponses. Les preuves vont devenir très précises.");
+      }
+    };
+
+    state.timer = setInterval(() => {
+      state.timeLeft -= 1;
+      const timerEl = document.getElementById('modalTimerNum');
+      if(timerEl){
+        timerEl.textContent = String(state.timeLeft);
+        // Visual urgency cue — color shifts as time drains
+        if (state.timeLeft <= 5){
+          timerEl.classList.add('timer-critical');
+          timerEl.classList.remove('timer-warn');
+        } else if (state.timeLeft <= 15){
+          timerEl.classList.add('timer-warn');
+          timerEl.classList.remove('timer-critical');
+        } else {
+          timerEl.classList.remove('timer-warn','timer-critical');
+        }
+      }
+      // Tick-tock starts at 15s, becomes urgent under 5s
+      if (state.timeLeft <= 5 && state.timeLeft > 0) playTick(true);
+      else if (state.timeLeft <= 15 && state.timeLeft > 0) playTick(false);
+      if(state.timeLeft <= 0){
+        clearTimer();
+        playTimeUp();
+        const answers = collectModalAnswers(round.questions.length);
+        state.submissions[teamId] = { answers, usedClue: existing.usedClue, hintsUsed: existing.hintsUsed.slice() };
+        // Brief visual flash before closing
+        if (timerEl){ timerEl.textContent = "0"; timerEl.classList.add('timer-up'); }
+        setTimeout(() => {
+          closeModal();
+          renderDecisionHub();
+        }, 1200); // let sad trombone breathe
+      }
+    }, 1000);
+  }
+
+  function collectModalAnswers(count){
+    const answers = [];
+    for(let i=0;i<count;i++){
+      const checked = el.modal.querySelector(`input[name="q${i}"]:checked`);
+      answers.push(checked ? Number(checked.value) : null);
+    }
+    return answers;
+  }
+
+  function saveDraftAnswers(teamId, existing){
+    const answers = collectModalAnswers(ROUNDS[state.roundIndex].questions.length);
+    const anyHints = (existing.hintsUsed || []).some(h => h);
+    state.submissions[teamId] = (existing.usedClue || anyHints || answers.some(a => a !== null))
+      ? { answers, usedClue: existing.usedClue, hintsUsed: (existing.hintsUsed || []).slice(), draft:true }
+      : undefined;
+    if(state.submissions[teamId] && state.submissions[teamId].draft){
+      delete state.submissions[teamId];
+    }
+  }
+
+  function closeModal(){
+    clearTimer();
+    el.modalRetourdrop.classList.remove('show');
+    el.modal.innerHTML = '';
+    state.currentModalTeam = null;
+  }
+
+  function computeRound(){
+    const round = ROUNDS[state.roundIndex];
+    if(!state.allRoundResults) state.allRoundResults = {};
+    state.allRoundResults[state.roundIndex] = {};
+    state.teams.forEach(team => {
+      const submission = state.submissions[team.id] || { answers: [] };
+      let gain = 0;
+      const detail = round.questions.map((q, i) => {
+        const correct = submission.answers[i] === q.correct;
+        if(correct) gain += q.points;
+        if(i===0 && correct) team.correctDiagnosis += 1;
+        if(i===1 && correct) team.correctEvidence += 1;
+        if(i===2 && correct) team.correctAction += 1;
+        if(i===3 && correct) team.correctCivic += 1;
+        return { correct, answer: submission.answers[i], correctIndex: q.correct, points: q.points };
+      });
+      team.score += gain;
+      const isPerfect = gain === 8;
+      if(isPerfect) team.perfectRounds += 1;
+      // streak: consecutive perfect (8/8) rounds. Réinitialisers on any miss.
+      if(isPerfect){
+        team.streak += 1;
+        if(team.streak > team.bestStreak) team.bestStreak = team.streak;
+      } else {
+        team.streak = 0;
+      }
+      // hint-free badge: perfect round AND no hints used
+      const hintsUsed = (submission.hintsUsed || []).some(h => h);
+      const hintFreePerfect = isPerfect && !hintsUsed;
+      if(hintFreePerfect) team.hintFreeRounds += 1;
+      // Aggregate counters for end-game medals
+      const hintsUsedThisRound = (submission.hintsUsed || []).filter(h => h).length;
+      team.totalHintsUsed += hintsUsedThisRound;
+      if(submission.usedClue) team.tokensEverUsed += 1;
+      if(submission.fastLock) team.fastLocks += 1;
+      submission.gain = gain;
+      submission.detail = detail;
+      submission.isPerfect = isPerfect;
+      submission.hintsUsedAny = hintsUsed;
+      submission.hintFreePerfect = hintFreePerfect;
+      submission.reaction = pickReaction(gain);
+      // Snapshot for medal history
+      state.allRoundResults[state.roundIndex][team.id] = {
+        gain, isPerfect, hintsUsedAny: hintsUsed, hintFreePerfect,
+        reaction: submission.reaction
+      };
+    });
+  }
+
+  function renderResolution(){
+    state.screen = 'resolution';
+    const round = ROUNDS[state.roundIndex];
+    const perfectTeams = state.teams.filter(t => state.submissions[t.id]?.gain === 8);
+    const anyPerfect = perfectTeams.length > 0;
+    const allPerfect = perfectTeams.length === state.teams.length;
+    const allZero = state.teams.every(t => state.submissions[t.id]?.gain === 0);
+    // Audio choice — louder fanfare when there's a perfect; subtler when there isn't
+    if (allPerfect && state.teams.length > 1){
+      playPerfectFanfare();
+      setTimeout(() => playPerfectFanfare(), 380); // double fanfare
+    } else if (anyPerfect){
+      playPerfectFanfare();
+    } else {
+      playWrong();
+    }
+    // Footer line: special-case group humor
+    if (allPerfect && state.teams.length > 1) setFooter(rand(HUMOR.groupAllPerfect));
+    else if (allZero) setFooter(rand(HUMOR.groupAllZero));
+    else setFooter(rand(HUMOR.results));
+    el.screen.innerHTML = `
+      ${renderScoreStrip()}
+      <section class="panel">
+        <div class="round-header">
+          <div>
+            <div class="kicker">Résultats de la manche</div>
+            <h2 style="margin:0 0 8px">${escapeHtml(round.title)}</h2>
+            <div class="subtle">${escapeHtml(round.explanation)}</div>
+          </div>
+          <div class="panel soft" style="max-width:280px">
+            <div class="tiny">Type de manche</div>
+            <div class="round-type" style="margin-top:8px">${escapeHtml(TYPES[round.type].icon)} ${escapeHtml(round.type)}</div>
+          </div>
+        </div>
+
+        <div class="resolution-grid">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Réponses correctes</h3>
+            ${round.questions.map((q,i) => {
+              const hintText = (ROUNDS_HINTS[state.roundIndex] || [])[i] || "";
+              return `
+              <div class="answer-key-item">
+                <div class="pts">Q${i+1} • +${q.points}</div>
+                <div style="font-weight:700; margin:6px 0">${escapeHtml(q.text)}</div>
+                <div><strong>Réponse correcte :</strong> ${escapeHtml(q.options[q.correct])}</div>
+                ${hintText ? `<div class="hint-recap"><span class="lamp">💡</span> <em>Raisonnement :</em> ${hintText}</div>` : ''}
+              </div>
+            `;}).join('')}
+            <div class="flavor">${escapeHtml(round.flavor)}</div>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Résultats des équipes</h3>
+            ${state.teams.map(team => {
+              const sub = state.submissions[team.id];
+              const streakChip = team.streak >= 2
+                ? `<span class="streak-chip hot"><span class="flame">🔥</span>${team.streak}-manches de série</span>`
+                : (team.bestStreak >= 2 ? `<span class="streak-chip">Meilleure série : ${team.bestStreak}</span>` : '');
+              const hintFreeBadge = sub.hintFreePerfect ? `<span class="perfect-badge">SANS AIDE</span>` : '';
+              return `
+                <div class="result-team">
+                  <div style="display:flex; justify-content:space-between; gap:12px; align-items:center">
+                    <div>
+                      <h4 style="margin:0"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)} ${hintFreeBadge}</h4>
+                      <div class="caption">
+                        Diagnostic ${sub.detail[0].correct ? '✓' : '✕'} •
+                        Preuves ${sub.detail[1].correct ? '✓' : '✕'} •
+                        Action ${sub.detail[2].correct ? '✓' : '✕'} •
+                        Civique ${sub.detail[3].correct ? '✓' : '✕'}
+                      </div>
+                    </div>
+                    <div class="gain ${sub.gain > 0 ? 'positive' : ''}">+${sub.gain}</div>
+                  </div>
+                  <div class="caption">Score total : ${team.score}</div>
+                  ${sub.reaction ? `<div class="reaction-beat">${escapeHtml(sub.reaction)}</div>` : ''}
+                  ${streakChip ? `<div class="streak-row">${streakChip}</div>` : ''}
+                </div>
+              `;
+            }).join('')}
+            ${state.teams.some(t => state.submissions[t.id].gain === 8) ? `<div class="narration">${escapeHtml(round.perfectLine)}</div>` : `<div class="narration">Le jeu de données suggérait un arrangement de choix plus réussi.</div>`}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="nextStepBtn">${state.roundIndex < ROUNDS.length - 1 ? 'Manche suivante' : 'Résultats finaux'}</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('nextStepBtn').onclick = () => {
+      playTransition();
+      if(state.roundIndex < ROUNDS.length - 1){
+        state.roundIndex += 1;
+        state.submissions = {};
+        renderRoundIntro();
+      } else {
+        renderFinal();
+      }
+    };
+  }
+
+  function rankTeams(){
+    return [...state.teams].sort((a,b) => 
+      b.score - a.score ||
+      b.perfectRounds - a.perfectRounds ||
+      b.correctAction - a.correctAction
+    );
+  }
+
+  function renderFinal(){
+    state.screen = 'final';
+    const ranked = rankTeams();
+    const winner = ranked[0];
+    setFooter("Bonne science. Bon jugement. Meilleure eau.");
+    playCorrect();
+    el.screen.innerHTML = `
+      <section class="panel">
+        <div class="kicker">Mission terminée</div>
+        <div class="winner center">
+          <h2 class="display-title" style="font-size:48px; margin-bottom:8px">${escapeHtml(winner.name)} gagne</h2>
+          <div class="big-score">${winner.score}</div>
+          <div class="subtle">Meilleur score des Gardiens</div>
+          <div class="flavor" style="max-width:760px; margin:18px auto 0">${escapeHtml(winner.name)} a interprété les preuves avec le plus de précision et a pris les meilleures décisions globales tout au long de la mission.</div>
+        </div>
+
+        <div class="grid2" style="margin-top:18px">
+          <div class="panel soft">
+            <h3 style="margin-top:0">Classement final</h3>
+            <table class="table">
+              <thead><tr><th>Rang</th><th>Équipe</th><th>Score</th><th>Parfait</th><th>Meilleure série</th><th>Sans aide</th></tr></thead>
+              <tbody>
+                ${ranked.map((team, idx) => `
+                  <tr>
+                    <td>${idx+1}</td>
+                    <td><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</td>
+                    <td>${team.score}</td>
+                    <td>${team.perfectRounds}</td>
+                    <td>${team.bestStreak}${team.bestStreak >= 2 ? ' 🔥' : ''}</td>
+                    <td>${team.hintFreeRounds}${team.hintFreeRounds > 0 ? ' ✨' : ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="caption" style="margin-top:8px">
+              <strong>Sans aide</strong> = manches parfaites réussies sans utiliser d’indice de raisonnement. <strong>Série</strong> = manches parfaites consécutives. Les deux servent à se vanter, pas à modifier le score.
+            </div>
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Réussites</h3>
+            <div class="caption" style="margin-bottom:12px">Médailles cosmétiques — elles ne modifient pas le classement.</div>
+            ${ranked.map(team => {
+              const earnedMedals = MEDALS.filter(m => {
+                try { return m.test(team, state); } catch(e){ return false; }
+              });
+              team.medals = earnedMedals.map(m => m.id);
+              return `
+                <div class="result-team" style="margin-bottom:12px">
+                  <h4 style="margin:0 0 6px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+                  ${earnedMedals.length === 0
+                    ? `<div class="caption" style="font-style:italic">Aucune médaille cette partie. La rivière s’en souviendra.</div>`
+                    : `<div class="medals-row">${earnedMedals.map(m => `<span class="medal" title="${escapeHtml(m.dryline)}"><span class="ico">${m.icon}</span>${escapeHtml(m.label)}</span>`).join('')}</div>
+                       <div class="caption" style="margin-top:8px">${earnedMedals.map(m => '<em style="color:#ffe9c2">' + m.icon + '</em> ' + escapeHtml(m.dryline)).join('<br>')}</div>`
+                  }
+                </div>`;
+            }).join('')}
+          </div>
+          <div class="panel soft">
+            <h3 style="margin-top:0">Analyse de la mission</h3>
+            ${ranked.map(team => `
+              <div class="result-team">
+                <h4 style="margin:0 0 8px"><span class="team-icon">${escapeHtml(team.icon||'🌊')}</span>${escapeHtml(team.name)}</h4>
+                <div class="caption">Diagnostics corrects : ${team.correctDiagnosis}</div>
+                <div class="caption">Choix de preuves corrects : ${team.correctEvidence}</div>
+                <div class="caption">Choix d’actions corrects : ${team.correctAction}</div>
+                <div class="caption">Choix civiques / d’action publique corrects : ${team.correctCivic}</div>
+                <div class="caption">Indices utilisés : ${team.totalHintsUsed} • Jetons de vérification dépensés : ${team.tokensEverUsed}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="narration" style="margin-top:18px">
+          La mission est terminée.<br><br>
+          Certaines décisions ont amélioré le système. D’autres avaient seulement l’air énergiques.
+          Ce qui compte, c’est que les preuves ont été lues, des choix ont été faits, et l’eau a été traitée comme quelque chose qui mérite d’être compris.
+          C’est un excellent point de départ.
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="playAgainBtn">Rejouer</button>
+          <button id="homeBtn">Retour à l’accueil</button>
+        </div>
+      </section>
+    `;
+    document.getElementById('playAgainBtn').onclick = () => {
+      playTransition();
+      state.roundIndex = 0;
+      state.teams.forEach(t => {
+        t.score = 0; t.tokens = 2; t.perfectRounds = 0;
+        t.correctDiagnosis = 0; t.correctAction = 0; t.correctEvidence = 0; t.correctCivic = 0;
+        t.streak = 0; t.bestStreak = 0; t.hintFreeRounds = 0;
+        t.tokensEverUsed = 0; t.totalHintsUsed = 0; t.fastLocks = 0; t.medals = [];
+      });
+      state.submissions = {};
+      state.allRoundResults = {};
+      renderOpening();
+    };
+    document.getElementById('homeBtn').onclick = () => {
+      playClick();
+      resetGame();
+    };
+  }
+
+  function renderCurrentFlow(){
+    switch(state.screen){
+      case 'setup': return renderSetup();
+      case 'opening': return renderOpening();
+      case 'roundIntro': return renderRoundIntro();
+      case 'roll': return renderRoll();
+      case 'evidence': return renderEvidence();
+      case 'decision': return renderDecisionHub();
+      case 'resolution': return renderResolution();
+      case 'final': return renderFinal();
+      default: return renderHome();
+    }
+  }
+
+  function render(){
+    if(state.screen === 'home') renderHome();
+    else renderCurrentFlow();
+  }
+
+  el.audioToggle.onclick = () => {
+    unlockAudio();
+    state.audioEnabled = !state.audioEnabled;
+    if(state.audioEnabled){ ambientStart(); playClick(); }
+    else ambientStop();
+    el.audioToggle.textContent = `Audio: ${state.audioEnabled ? 'activé' : 'désactivé'}`;
+  };
+  el.resetBtn.onclick = () => { playClick(); resetGame(); };
+  el.howToBtn.onclick = () => { playClick(); renderHowTo(); };
+  el.modalRetourdrop.addEventListener('click', (e) => {
+    if(e.target === el.modalRetourdrop){
+      closeModal();
+      renderDecisionHub();
+    }
+  });
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && state.currentModalTeam !== null){
+      closeModal();
+      renderDecisionHub();
+    }
+  });
+  document.body.addEventListener('pointerdown', unlockAudio, { once: true });
+  render();
+})();
+</script>
+</body>
+</html>
